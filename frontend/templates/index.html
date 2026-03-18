@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GNSS / INS Visualizer</title>
+  <meta name="description" content="Realtime GNSS and INS signal visualizer" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Realtime Signal Monitor</p>
+      <h1>GNSS / INS Visualizer</h1>
+    </div>
+
+    <div id="status-badge" class="status connecting">
+      <span class="dot"></span>
+      <span id="status-text">Connecting</span>
+    </div>
+
+    <div class="header-meta">
+      <div class="meta-chip">Port <span id="hdr-port">N/A</span></div>
+      <div class="meta-chip">Baud <span id="hdr-baud">0</span></div>
+      <div class="meta-chip">Samples <span id="hdr-samples">0</span></div>
+      <div class="meta-chip">Time <span id="hdr-time">0.0 s</span></div>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="sidebar">
+      <section class="panel controls-panel">
+        <div class="panel-title-row">
+          <h2>Controls</h2>
+        </div>
+
+        <div class="control-block">
+          <span class="control-label">Time Window</span>
+          <div class="segmented" id="window-controls">
+            <button type="button" class="segmented-btn" data-window="10">10s</button>
+            <button type="button" class="segmented-btn active" data-window="30">30s</button>
+            <button type="button" class="segmented-btn" data-window="60">60s</button>
+          </div>
+        </div>
+
+        <div class="control-block action-row">
+          <button type="button" id="pause-btn" class="action-btn">Pause Scroll</button>
+          <button type="button" id="clear-track-btn" class="action-btn ghost">Clear Track</button>
+        </div>
+      </section>
+
+      <section class="panel browser-panel">
+        <div class="panel-title-row">
+          <h2>Signals</h2>
+          <span class="panel-subtitle">PlotJuggler-style browser</span>
+        </div>
+        <div id="signal-browser" class="signal-browser"></div>
+      </section>
+    </aside>
+
+    <section class="workspace">
+      <section class="panel live-strip-panel">
+        <div class="panel-title-row live-strip-title-row">
+          <h2>Live Snapshot</h2>
+          <span id="sample-clock" class="panel-subtitle">t = 0.0 s</span>
+        </div>
+
+        <div class="live-strip">
+          <div class="live-tile compact">
+            <span class="snapshot-label">Fix</span>
+            <span id="info-fix" class="fix-badge fix-0">0</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Lat / Lon</span>
+            <span id="info-latlon" class="snapshot-value mono">-</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Quaternion</span>
+            <span id="info-q" class="snapshot-value mono">-</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Gyroscope</span>
+            <span id="info-g" class="snapshot-value mono">-</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Accelerometer</span>
+            <span id="info-a" class="snapshot-value mono">-</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Position Covariance</span>
+            <span id="info-pcov" class="snapshot-value mono">-</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Velocity Covariance</span>
+            <span id="info-vcov" class="snapshot-value mono">-</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="plot-matrix">
+        <article class="panel plot-panel track-panel">
+          <div class="panel-title-row">
+            <h2>GPS Track</h2>
+            <span class="panel-subtitle">Longitude vs Latitude</span>
+          </div>
+          <div class="chart-wrap matrix-chart track-wrap">
+            <canvas id="chart-track"></canvas>
+          </div>
+        </article>
+
+        <article class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Quaternion</h2>
+            <span id="summary-quat" class="plot-summary">qw -, qx -, qy -, qz -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-quat"></canvas></div>
+        </article>
+
+        <article class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Gyroscope</h2>
+            <span id="summary-gyro" class="plot-summary">gx -, gy -, gz -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-gyro"></canvas></div>
+        </article>
+
+        <article class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Accelerometer</h2>
+            <span id="summary-accel" class="plot-summary">ax -, ay -, az -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-accel"></canvas></div>
+        </article>
+
+        <article class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Position Covariance</h2>
+            <span id="summary-pcov" class="plot-summary">pcn -, pce -, pcd -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-pcov"></canvas></div>
+        </article>
+
+        <article class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Velocity Covariance</h2>
+            <span id="summary-vcov" class="plot-summary">vcn -, vce -, vcd -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-vcov"></canvas></div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
