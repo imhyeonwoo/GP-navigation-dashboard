@@ -94,6 +94,18 @@
             <span class="snapshot-label">Velocity Covariance</span>
             <span id="info-vcov" class="snapshot-value mono">-</span>
           </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Local NED</span>
+            <span id="info-ned" class="snapshot-value mono">-</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">Align Bias</span>
+            <span id="info-align" class="snapshot-value mono">-</span>
+          </div>
+          <div class="live-tile wide">
+            <span class="snapshot-label">NED Reference</span>
+            <span id="info-ref" class="snapshot-value mono">-</span>
+          </div>
         </div>
       </section>
 
@@ -146,6 +158,22 @@
             <span id="summary-vcov" class="plot-summary">vcn -, vce -, vcd -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-vcov"></canvas></div>
+        </article>
+
+        <article class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>GPS NED</h2>
+            <span id="summary-ned" class="plot-summary">N -, E -, D -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-ned"></canvas></div>
+        </article>
+
+        <article class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Alignment Bias</h2>
+            <span id="summary-align" class="plot-summary">bgx -, bgy -, bgz -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-align"></canvas></div>
         </article>
       </section>
     </section>

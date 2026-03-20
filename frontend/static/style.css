@@ -31,6 +31,12 @@
   --c-vcn: #4dd8ff;
   --c-vce: #ff8f6b;
   --c-vcd: #c5a3ff;
+  --c-ned-n: #4dd8ff;
+  --c-ned-e: #86f7b8;
+  --c-ned-d: #ffd166;
+  --c-bgx: #ff8f6b;
+  --c-bgy: #86f7b8;
+  --c-bgz: #a0b6ff;
 }
 
 * { box-sizing: border-box; }
@@ -334,7 +340,7 @@ button, input, select { font: inherit; }
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 100px repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 .live-tile {
@@ -405,10 +411,7 @@ button, input, select { font: inherit; }
 .track-wrap {
   height: 190px;
 }
-canvas {
-  width: 100%;
-  height: 100%;
-}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -445,3 +448,4 @@ canvas {
   .matrix-chart,
   .track-wrap { height: 220px; }
 }
+

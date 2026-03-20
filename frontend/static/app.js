@@ -86,6 +86,26 @@ const SIGNAL_GROUPS = [
       { key: 'vcd', label: 'vcd', color: '--c-vcd', decimals: 4 },
     ],
   },
+  {
+    title: 'GPS NED',
+    subtitle: 'Local north-east-down',
+    chart: 'ned',
+    signals: [
+      { key: 'ned_n', label: 'N', color: '--c-ned-n', decimals: 3 },
+      { key: 'ned_e', label: 'E', color: '--c-ned-e', decimals: 3 },
+      { key: 'ned_d', label: 'D', color: '--c-ned-d', decimals: 3 },
+    ],
+  },
+  {
+    title: 'Alignment Bias',
+    subtitle: 'Body-frame gyro bias',
+    chart: 'align',
+    signals: [
+      { key: 'bgx', label: 'bgx', color: '--c-bgx', decimals: 6 },
+      { key: 'bgy', label: 'bgy', color: '--c-bgy', decimals: 6 },
+      { key: 'bgz', label: 'bgz', color: '--c-bgz', decimals: 6 },
+    ],
+  },
 ];
 
 const signalIndex = new Map();
@@ -104,6 +124,7 @@ const state = {
   timeWindow: 30,
   paused: false,
   pendingRedraw: false,
+  latestSample: {},
 };
 
 const dom = {
@@ -124,11 +145,16 @@ const dom = {
   infoA: document.getElementById('info-a'),
   infoPcov: document.getElementById('info-pcov'),
   infoVcov: document.getElementById('info-vcov'),
+  infoNed: document.getElementById('info-ned'),
+  infoAlign: document.getElementById('info-align'),
+  infoRef: document.getElementById('info-ref'),
   summaryQuat: document.getElementById('summary-quat'),
   summaryGyro: document.getElementById('summary-gyro'),
   summaryAccel: document.getElementById('summary-accel'),
   summaryPcov: document.getElementById('summary-pcov'),
   summaryVcov: document.getElementById('summary-vcov'),
+  summaryNed: document.getElementById('summary-ned'),
+  summaryAlign: document.getElementById('summary-align'),
 };
 
 function css(name) {
@@ -260,58 +286,21 @@ function makeTrackChart() {
 }
 
 const charts = {
-  quat: makeTimeChart(
-    'chart-quat',
-    SIGNAL_GROUPS[0].signals.map((signal) => ({
-      label: signal.label,
-      data: [],
-      borderColor: css(signal.color),
-      backgroundColor: css(signal.color),
-      hidden: false,
-    })),
-  ),
-  gyro: makeTimeChart(
-    'chart-gyro',
-    SIGNAL_GROUPS[1].signals.map((signal) => ({
-      label: signal.label,
-      data: [],
-      borderColor: css(signal.color),
-      backgroundColor: css(signal.color),
-      hidden: false,
-    })),
-  ),
-  accel: makeTimeChart(
-    'chart-accel',
-    SIGNAL_GROUPS[2].signals.map((signal) => ({
-      label: signal.label,
-      data: [],
-      borderColor: css(signal.color),
-      backgroundColor: css(signal.color),
-      hidden: false,
-    })),
-  ),
-  pcov: makeTimeChart(
-    'chart-pcov',
-    SIGNAL_GROUPS[3].signals.map((signal) => ({
-      label: signal.label,
-      data: [],
-      borderColor: css(signal.color),
-      backgroundColor: css(signal.color),
-      hidden: false,
-    })),
-  ),
-  vcov: makeTimeChart(
-    'chart-vcov',
-    SIGNAL_GROUPS[4].signals.map((signal) => ({
-      label: signal.label,
-      data: [],
-      borderColor: css(signal.color),
-      backgroundColor: css(signal.color),
-      hidden: false,
-    })),
-  ),
   track: makeTrackChart(),
 };
+
+for (const group of SIGNAL_GROUPS) {
+  charts[group.chart] = makeTimeChart(
+    `chart-${group.chart}`,
+    group.signals.map((signal) => ({
+      label: signal.label,
+      data: [],
+      borderColor: css(signal.color),
+      backgroundColor: css(signal.color),
+      hidden: false,
+    })),
+  );
+}
 
 function datasetForKey(key) {
   const signal = signalIndex.get(key);
@@ -463,6 +452,15 @@ function trimTrack() {
   }
 }
 
+function mergeSample(sample) {
+  for (const [key, value] of Object.entries(sample || {})) {
+    if (key === 'timestamp' || key === 't' || key === 'kind') {
+      continue;
+    }
+    state.latestSample[key] = value;
+  }
+}
+
 function updateSummary(sample, timeValue) {
   if (!sample) {
     return;
@@ -477,12 +475,19 @@ function updateSummary(sample, timeValue) {
   dom.infoA.textContent = `(${formatNumber(sample.ax, 4)}, ${formatNumber(sample.ay, 4)}, ${formatNumber(sample.az, 4)})`;
   dom.infoPcov.textContent = `(${formatNumber(sample.pcn, 4)}, ${formatNumber(sample.pce, 4)}, ${formatNumber(sample.pcd, 4)})`;
   dom.infoVcov.textContent = `(${formatNumber(sample.vcn, 4)}, ${formatNumber(sample.vce, 4)}, ${formatNumber(sample.vcd, 4)})`;
+  dom.infoNed.textContent = `(${formatNumber(sample.ned_n, 3)}, ${formatNumber(sample.ned_e, 3)}, ${formatNumber(sample.ned_d, 3)})`;
+  dom.infoAlign.textContent = `(${formatNumber(sample.bgx, 6)}, ${formatNumber(sample.bgy, 6)}, ${formatNumber(sample.bgz, 6)}) ${Number.isFinite(sample.align_samples) && Number.isFinite(sample.align_required) ? `[${sample.align_samples}/${sample.align_required}]` : ''}${sample.align_complete === 1 ? ' done' : ''}`.trim();
+  dom.infoRef.textContent = sample.ref_valid === 1
+    ? `${formatNumber(sample.ref_lat, 7)}, ${formatNumber(sample.ref_lon, 7)}, h ${formatNumber(sample.ref_h, 3)}`
+    : '-';
   dom.sampleClock.textContent = `t = ${formatNumber(timeValue, 2)} s`;
   dom.summaryQuat.textContent = `qw ${formatNumber(sample.qw, 4)}  qx ${formatNumber(sample.qx, 4)}  qy ${formatNumber(sample.qy, 4)}  qz ${formatNumber(sample.qz, 4)}`;
   dom.summaryGyro.textContent = `gx ${formatNumber(sample.gx, 4)}  gy ${formatNumber(sample.gy, 4)}  gz ${formatNumber(sample.gz, 4)}`;
   dom.summaryAccel.textContent = `ax ${formatNumber(sample.ax, 4)}  ay ${formatNumber(sample.ay, 4)}  az ${formatNumber(sample.az, 4)}`;
   dom.summaryPcov.textContent = `pcn ${formatNumber(sample.pcn, 4)}  pce ${formatNumber(sample.pce, 4)}  pcd ${formatNumber(sample.pcd, 4)}`;
   dom.summaryVcov.textContent = `vcn ${formatNumber(sample.vcn, 4)}  vce ${formatNumber(sample.vce, 4)}  vcd ${formatNumber(sample.vcd, 4)}`;
+  dom.summaryNed.textContent = `N ${formatNumber(sample.ned_n, 3)}  E ${formatNumber(sample.ned_e, 3)}  D ${formatNumber(sample.ned_d, 3)}`;
+  dom.summaryAlign.textContent = `bgx ${formatNumber(sample.bgx, 6)}  bgy ${formatNumber(sample.bgy, 6)}  bgz ${formatNumber(sample.bgz, 6)}`;
 
   for (const [key, signal] of signalIndex.entries()) {
     const valueNode = document.getElementById(`value-${key}`);
@@ -510,6 +515,7 @@ function pushSamples(samples) {
         : state.latestTime;
 
     state.latestTime = Math.max(state.latestTime, timeValue);
+    state.sampleCount += 1;
 
     for (const [key] of signalIndex.entries()) {
       const dataset = datasetForKey(key);
@@ -523,14 +529,13 @@ function pushSamples(samples) {
       charts.track.data.datasets[0].data.push({ x: sample.lon, y: sample.lat });
     }
 
-    updateSummary(sample, timeValue);
+    mergeSample(sample);
+    updateSummary(state.latestSample, timeValue);
   }
 
   trimTimeSeries();
   trimTrack();
 
-  const referenceDataset = charts.quat.data.datasets[0];
-  state.sampleCount = referenceDataset ? referenceDataset.data.length : 0;
   dom.hdrSamples.textContent = String(state.sampleCount);
   dom.hdrTime.textContent = `${formatNumber(state.latestTime, 1)} s`;
 
@@ -629,8 +634,3 @@ buildSignalBrowser();
 bindControls();
 loadHistory();
 bindSocket();
-
-
-
-
-

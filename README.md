@@ -2,7 +2,32 @@
 
 Realtime GNSS/INS web visualizer with a PlotJuggler-style layout.
 
+## Project Structure
 
+```text
+backend/
+  app.py              Flask + Socket.IO server
+bridge/
+  parser.py           Serial line parser
+  reader.py           Serial/demo data bridge
+  store.py            Rolling sample store
+frontend/
+  templates/
+    index.html        Web UI shell
+  static/
+    app.js            Plotting logic
+    style.css         Dashboard styling
+server.py             Root entrypoint
+viewer.py             Legacy matplotlib viewer
+```
+
+## Features
+
+- Left-side signal browser for enabling or disabling channels
+- Shared rolling time axis for synchronized plots
+- Separate plots for quaternion, gyro, accel, position covariance, and velocity covariance
+- GPS track panel and latest sample summary
+- Demo mode for testing without hardware
 
 ## Setup
 
@@ -15,13 +40,12 @@ pip install -r requirements.txt
 
 ## Run
 
-### Demo mode (no hardware)
+### Demo mode
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python server.py --port DEMOMODE
 ```
-- dummy data
 
 ### Real serial port
 
@@ -29,8 +53,6 @@ python server.py --port DEMOMODE
 .\.venv\Scripts\Activate.ps1
 python server.py --port COM5 --baud 115200
 ```
-- real-time data
-- COM5 is example, change it to your serial port
 
 Open `http://127.0.0.1:5000` in your browser.
 

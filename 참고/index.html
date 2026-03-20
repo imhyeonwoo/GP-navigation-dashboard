@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6DoF Fighter Jet — Z-up Convention</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0c10; --panel: #12151c; --border: #1e2330;
+    --accent: #e53935; --accent2: #ff6f61; --text: #c8ccd4; --text-dim: #5a6178;
+    --green: #4caf50; --blue: #42a5f5; --yellow: #fdd835; --cyan: #26c6da;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'JetBrains Mono', 'Noto Sans KR', monospace;
+    background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex;
+  }
+  #canvas-container { flex: 1; position: relative; }
+  canvas { display: block; }
+  .hud-top {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(12,15,22,0.85); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 20px; font-size: 13px; color: var(--accent);
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 700; backdrop-filter: blur(8px);
+  }
+  .conv-badge {
+    position: absolute; top: 56px; left: 50%; transform: translateX(-50%);
+    background: rgba(66,165,245,0.15); border: 1px solid rgba(66,165,245,0.3); border-radius: 6px;
+    padding: 4px 14px; font-size: 10px; color: var(--blue); letter-spacing: 1px; backdrop-filter: blur(8px);
+  }
+  .hud-info {
+    position: absolute; top: 16px; left: 16px;
+    background: rgba(12,15,22,0.85); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 16px; font-size: 11px; line-height: 1.8; backdrop-filter: blur(8px);
+  }
+  .hud-info .label { color: var(--text-dim); }
+  .hud-info .val { font-weight: 600; }
+  .hud-info .val.pos { color: var(--green); }
+  .hud-info .val.ori { color: var(--yellow); }
+  #panel {
+    width: 320px; background: var(--panel); border-left: 1px solid var(--border);
+    overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .panel-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 3px;
+    color: var(--accent); margin-bottom: 4px; font-weight: 700;
+  }
+  .section {
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px;
+  }
+  .section-head {
+    font-size: 12px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-head .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .slider-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-label { width: 42px; font-size: 12px; font-weight: 600; text-align: right; flex-shrink: 0; }
+  .slider-wrap { flex: 1; }
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--bg); cursor: pointer;
+  }
+  .slider-val { width: 58px; font-size: 11px; text-align: right; color: var(--text-dim); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .c-x { color: var(--accent); } .c-y { color: var(--green); } .c-z { color: var(--blue); }
+  .c-roll { color: var(--cyan); } .c-pitch { color: var(--accent2); } .c-yaw { color: var(--yellow); }
+  .sl-x::-webkit-slider-thumb { background: var(--accent); } .sl-x { background: linear-gradient(90deg, #2a1215, var(--accent)); }
+  .sl-y::-webkit-slider-thumb { background: var(--green); } .sl-y { background: linear-gradient(90deg, #122a15, var(--green)); }
+  .sl-z::-webkit-slider-thumb { background: var(--blue); } .sl-z { background: linear-gradient(90deg, #12192a, var(--blue)); }
+  .sl-roll::-webkit-slider-thumb { background: var(--cyan); } .sl-roll { background: linear-gradient(90deg, #0f2226, var(--cyan)); }
+  .sl-pitch::-webkit-slider-thumb { background: var(--accent2); } .sl-pitch { background: linear-gradient(90deg, #2a1a18, var(--accent2)); }
+  .sl-yaw::-webkit-slider-thumb { background: var(--yellow); } .sl-yaw { background: linear-gradient(90deg, #2a2810, var(--yellow)); }
+  .btn { width: 100%; padding: 10px; background: transparent; font-family: inherit; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+  .btn:hover { color: var(--bg) !important; }
+  .legend { font-size: 10px; color: var(--text-dim); line-height: 1.7; padding: 8px 0 0; }
+  .legend b { color: var(--text); }
+  .axes-legend {
+    position: absolute; bottom: 16px; left: 16px;
+    background: rgba(12,15,22,0.85); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 11px; line-height: 1.8; backdrop-filter: blur(8px);
+  }
+  .grid-overlay {
+    position: absolute; top:0; left:0; right:0; bottom:0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(30,35,48,0.12) 1px, transparent 1px), linear-gradient(rgba(30,35,48,0.12) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container">
+  <div class="grid-overlay"></div>
+  <div class="hud-top">6 DoF Pose Controller</div>
+  <div class="conv-badge">Z-UP Convention (Robotics / ROS)</div>
+  <div class="hud-info" id="hud-info"></div>
+  <div class="axes-legend">
+    <span class="c-x">&#9632; X (Red) Forward</span><br>
+    <span class="c-y">&#9632; Y (Green) Left</span><br>
+    <span class="c-z">&#9632; Z (Blue) Up</span>
+  </div>
+</div>
+
+<div id="panel">
+  <div class="panel-title">Pose in 3D Space</div>
+  <div class="section">
+    <div class="section-head"><span class="dot" style="background:var(--green)"></span> Position (x, y, z)</div>
+    <div class="slider-row"><span class="slider-label c-x">X</span><div class="slider-wrap"><input type="range" id="pos-x" class="sl-x" min="-10" max="10" step="0.1" value="0"></div><span class="slider-val" id="pos-x-val">0.0</span></div>
+    <div class="slider-row"><span class="slider-label c-y">Y</span><div class="slider-wrap"><input type="range" id="pos-y" class="sl-y" min="-10" max="10" step="0.1" value="0"></div><span class="slider-val" id="pos-y-val">0.0</span></div>
+    <div class="slider-row"><span class="slider-label c-z">Z</span><div class="slider-wrap"><input type="range" id="pos-z" class="sl-z" min="-10" max="10" step="0.1" value="0"></div><span class="slider-val" id="pos-z-val">0.0</span></div>
+  </div>
+  <div class="section">
+    <div class="section-head"><span class="dot" style="background:var(--yellow)"></span> Orientation (roll, pitch, yaw)</div>
+    <div class="slider-row"><span class="slider-label c-roll">Roll</span><div class="slider-wrap"><input type="range" id="ori-roll" class="sl-roll" min="-180" max="180" step="1" value="0"></div><span class="slider-val" id="ori-roll-val">0&deg;</span></div>
+    <div class="slider-row"><span class="slider-label c-pitch">Pitch</span><div class="slider-wrap"><input type="range" id="ori-pitch" class="sl-pitch" min="-90" max="90" step="1" value="0"></div><span class="slider-val" id="ori-pitch-val">0&deg;</span></div>
+    <div class="slider-row"><span class="slider-label c-yaw">Yaw</span><div class="slider-wrap"><input type="range" id="ori-yaw" class="sl-yaw" min="-180" max="180" step="1" value="0"></div><span class="slider-val" id="ori-yaw-val">0&deg;</span></div>
+  </div>
+  <button class="btn" style="border:1px solid var(--accent);color:var(--accent)" onclick="resetAll()" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='transparent'">Reset Pose</button>
+  <div class="section">
+    <div class="section-head"><span class="dot" style="background:var(--text-dim)"></span> Preset Maneuvers</div>
+    <button class="btn" style="border:1px solid var(--cyan);color:var(--cyan);margin-bottom:6px" onclick="preset('barrel')" onmouseover="this.style.background='var(--cyan)'" onmouseout="this.style.background='transparent'">Barrel Roll</button>
+    <button class="btn" style="border:1px solid var(--accent2);color:var(--accent2);margin-bottom:6px" onclick="preset('climb')" onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='transparent'">Climb</button>
+    <button class="btn" style="border:1px solid var(--yellow);color:var(--yellow)" onclick="preset('bank')" onmouseover="this.style.background='var(--yellow)'" onmouseout="this.style.background='transparent'">Banking Turn</button>
+  </div>
+  <div class="legend">
+    <b>Convention: Z-up (ROS / Robotics)</b><br>
+    X = Forward, Y = Left, Z = Up<br><br>
+    <b>Roll</b>: X축 기준 회전 (좌우 기울기)<br>
+    <b>Pitch</b>: Y축 기준 회전 (기수 상하)<br>
+    <b>Yaw</b>: Z축 기준 회전 (기수 좌우)<br><br>
+    <b>Pose = Position + Orientation</b><br>
+    총 <b>6자유도(6DoF)</b>로 3D 공간에서의<br>물체 상태를 완전히 기술합니다.<br><br>
+    <b>마우스 드래그</b>: 카메라 회전<br>
+    <b>휠 스크롤</b>: 줌/당김
+  </div>
+</div>
+
+<script>
+// Coordinate mapping: Robotics Z-up -> Three.js Y-up
+//   Robotics X (forward) -> Three.js +X
+//   Robotics Y (left)    -> Three.js -Z
+//   Robotics Z (up)      -> Three.js +Y
+
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setClearColor(0x0a0c10);
+renderer.setPixelRatio(window.devicePixelRatio);
+container.appendChild(renderer.domElement);
+
+function resize() {
+  const w = container.clientWidth, h = container.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+resize();
+window.addEventListener('resize', resize);
+
+scene.add(new THREE.AmbientLight(0x404060, 0.6));
+const dl = new THREE.DirectionalLight(0xffffff, 0.9);
+dl.position.set(10, 15, 10); scene.add(dl);
+const dl2 = new THREE.DirectionalLight(0x4488ff, 0.3);
+dl2.position.set(-10, 5, -5); scene.add(dl2);
+
+// Ground grid on XY plane (robotics) = XZ plane (Three.js)
+scene.add(new THREE.GridHelper(20, 20, 0x1e2330, 0x141722));
+
+function makeLine(from, to, color) {
+  const geo = new THREE.BufferGeometry().setFromPoints([from, to]);
+  return new THREE.Line(geo, new THREE.LineBasicMaterial({ color }));
+}
+
+// World axes (robotics convention displayed in Three.js coords)
+scene.add(makeLine(new THREE.Vector3(0,0,0), new THREE.Vector3(12,0,0), 0xe53935));   // X fwd
+scene.add(makeLine(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-12), 0x4caf50));  // Y left
+scene.add(makeLine(new THREE.Vector3(0,0,0), new THREE.Vector3(0,12,0), 0x42a5f5));   // Z up
+
+// Axis labels
+function makeLabel(text, pos, color) {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 32;
+  const ctx = c.getContext('2d');
+  ctx.font = 'bold 24px monospace'; ctx.fillStyle = color; ctx.fillText(text, 4, 24);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c) }));
+  s.position.copy(pos); s.scale.set(1.5, 0.75, 1);
+  return s;
+}
+scene.add(makeLabel('X', new THREE.Vector3(12.8,0,0), '#e53935'));
+scene.add(makeLabel('Y', new THREE.Vector3(0,0,-12.8), '#4caf50'));
+scene.add(makeLabel('Z', new THREE.Vector3(0,12.8,0), '#42a5f5'));
+
+// ========== Fighter Jet ==========
+const jetGroup = new THREE.Group();
+const bodyMat = new THREE.MeshPhongMaterial({ color: 0x607080, flatShading: true });
+const accentMat = new THREE.MeshPhongMaterial({ color: 0xe53935, flatShading: true });
+const darkMat = new THREE.MeshPhongMaterial({ color: 0x2a3040, flatShading: true });
+const glassMat = new THREE.MeshPhongMaterial({ color: 0x88ccff, transparent: true, opacity: 0.6, flatShading: true });
+
+// Fuselage (along Three.js X = robotics X forward)
+const fus = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.15, 4, 8), bodyMat);
+fus.rotation.z = Math.PI / 2; jetGroup.add(fus);
+
+// Nose
+const nose = new THREE.Mesh(new THREE.ConeGeometry(0.15, 1.2, 8), accentMat);
+nose.rotation.z = -Math.PI / 2; nose.position.set(2.6,0,0); jetGroup.add(nose);
+
+// Cockpit (top = Three.js +Y = robotics +Z)
+const cockpit = new THREE.Mesh(new THREE.SphereGeometry(0.25,8,6,0,Math.PI*2,0,Math.PI/2), glassMat);
+cockpit.position.set(1.0,0.28,0); cockpit.scale.set(1.2,1,0.8); jetGroup.add(cockpit);
+
+// Wings (spread along Three.js Z = robotics -Y/+Y)
+const ws = new THREE.Shape();
+ws.moveTo(0,0); ws.lineTo(-1.5,3); ws.lineTo(-0.5,3); ws.lineTo(0.8,0);
+const wg = new THREE.ExtrudeGeometry(ws, { depth:0.06, bevelEnabled:false });
+// Left wing: robotics +Y = Three.js -Z
+const wL = new THREE.Mesh(wg, bodyMat);
+wL.rotation.x = -Math.PI/2; wL.position.set(0.2,0,-0.03); jetGroup.add(wL);
+// Right wing: robotics -Y = Three.js +Z
+const wR = new THREE.Mesh(wg, bodyMat);
+wR.rotation.x = Math.PI/2; wR.position.set(0.2,0,0.03); wR.scale.z=-1; jetGroup.add(wR);
+
+// Wing tips
+const tg = new THREE.BoxGeometry(0.3,0.04,0.15);
+const tL = new THREE.Mesh(tg, accentMat); tL.position.set(-0.8,0,-2.9); jetGroup.add(tL);
+const tR = new THREE.Mesh(tg, accentMat); tR.position.set(-0.8,0,2.9); jetGroup.add(tR);
+
+// Tail fin (vertical, rises in Three.js +Y = robotics +Z)
+const ts = new THREE.Shape();
+ts.moveTo(0,0); ts.lineTo(-0.8,1.5); ts.lineTo(-0.3,1.5); ts.lineTo(0.3,0);
+const tf = new THREE.Mesh(new THREE.ExtrudeGeometry(ts,{depth:0.05,bevelEnabled:false}), darkMat);
+tf.position.set(-1.8,0.15,-0.025); jetGroup.add(tf);
+
+// Horizontal stabilizers
+const hs = new THREE.Shape();
+hs.moveTo(0,0); hs.lineTo(-0.8,1.2); hs.lineTo(-0.3,1.2); hs.lineTo(0.3,0);
+const hg = new THREE.ExtrudeGeometry(hs,{depth:0.04,bevelEnabled:false});
+const hL = new THREE.Mesh(hg, darkMat); hL.rotation.x=-Math.PI/2; hL.position.set(-1.6,0,-0.02); jetGroup.add(hL);
+const hR = new THREE.Mesh(hg, darkMat); hR.rotation.x=Math.PI/2; hR.position.set(-1.6,0,0.02); hR.scale.z=-1; jetGroup.add(hR);
+
+// Engine
+const nz = new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.2,0.5,8), darkMat);
+nz.rotation.z = Math.PI/2; nz.position.x = -2.2; jetGroup.add(nz);
+const glowMat = new THREE.MeshBasicMaterial({ color: 0xff6633 });
+const gl = new THREE.Mesh(new THREE.CircleGeometry(0.18,8), glowMat);
+gl.rotation.y = Math.PI/2; gl.position.x = -2.45; jetGroup.add(gl);
+
+// Body-frame axes
+jetGroup.add(makeLine(new THREE.Vector3(0,0,0), new THREE.Vector3(3,0,0), 0xff5555));   // body X
+jetGroup.add(makeLine(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-3), 0x55ff55));  // body Y
+jetGroup.add(makeLine(new THREE.Vector3(0,0,0), new THREE.Vector3(0,3,0), 0x5599ff));   // body Z
+
+scene.add(jetGroup);
+
+// ========== Controls ==========
+const S = {
+  px: document.getElementById('pos-x'), py: document.getElementById('pos-y'), pz: document.getElementById('pos-z'),
+  roll: document.getElementById('ori-roll'), pitch: document.getElementById('ori-pitch'), yaw: document.getElementById('ori-yaw'),
+};
+const V = {
+  px: document.getElementById('pos-x-val'), py: document.getElementById('pos-y-val'), pz: document.getElementById('pos-z-val'),
+  roll: document.getElementById('ori-roll-val'), pitch: document.getElementById('ori-pitch-val'), yaw: document.getElementById('ori-yaw-val'),
+};
+
+function updateHUD() {
+  const px=parseFloat(S.px.value), py=parseFloat(S.py.value), pz=parseFloat(S.pz.value);
+  const rd=parseInt(S.roll.value), pd=parseInt(S.pitch.value), yd=parseInt(S.yaw.value);
+  V.px.textContent=px.toFixed(1); V.py.textContent=py.toFixed(1); V.pz.textContent=pz.toFixed(1);
+  V.roll.textContent=rd+'\u00B0'; V.pitch.textContent=pd+'\u00B0'; V.yaw.textContent=yd+'\u00B0';
+
+  document.getElementById('hud-info').innerHTML =
+    '<span class="label">Position</span><br>'+
+    '<span class="val pos">X:'+px.toFixed(1)+' Y:'+py.toFixed(1)+' Z:'+pz.toFixed(1)+'</span><br>'+
+    '<span class="label">Orientation</span><br>'+
+    '<span class="val ori">R:'+rd+'\u00B0 P:'+pd+'\u00B0 Y:'+yd+'\u00B0</span>';
+
+  // Map position: robotics(x,y,z) -> Three.js(x, z, -y)
+  jetGroup.position.set(px, pz, -py);
+
+  // Map rotation:
+  // Roll  = about robotics X  -> Three.js +X
+  // Pitch = about robotics Y  -> Three.js -Z
+  // Yaw   = about robotics Z  -> Three.js +Y
+  // Order: Rz(yaw) * Ry(pitch) * Rx(roll) in robotics
+  const d = Math.PI/180;
+  const qYaw   = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), yd*d);
+  const qPitch = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,-1), pd*d);
+  const qRoll  = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), rd*d);
+  const q = new THREE.Quaternion();
+  q.multiplyQuaternions(qYaw, qPitch);
+  q.multiplyQuaternions(q, qRoll);
+  jetGroup.quaternion.copy(q);
+}
+
+Object.values(S).forEach(s => s.addEventListener('input', updateHUD));
+function resetAll() { Object.values(S).forEach(s=>{s.value=0;}); updateHUD(); }
+
+// Presets
+let anim = false;
+function preset(name) {
+  if(anim) return;
+  const T = {
+    barrel: {px:0,py:0,pz:3,roll:180,pitch:0,yaw:0},
+    climb: {px:2,py:0,pz:5,roll:0,pitch:-30,yaw:0},
+    bank: {px:-3,py:4,pz:1,roll:-45,pitch:0,yaw:60},
+  };
+  const t=T[name]; if(!t) return;
+  anim=true;
+  const s={px:parseFloat(S.px.value),py:parseFloat(S.py.value),pz:parseFloat(S.pz.value),
+    roll:parseInt(S.roll.value),pitch:parseInt(S.pitch.value),yaw:parseInt(S.yaw.value)};
+  const dur=800, st=performance.now();
+  function step(now){
+    let p=Math.min((now-st)/dur,1); p=1-Math.pow(1-p,3);
+    S.px.value=s.px+(t.px-s.px)*p; S.py.value=s.py+(t.py-s.py)*p; S.pz.value=s.pz+(t.pz-s.pz)*p;
+    S.roll.value=Math.round(s.roll+(t.roll-s.roll)*p);
+    S.pitch.value=Math.round(s.pitch+(t.pitch-s.pitch)*p);
+    S.yaw.value=Math.round(s.yaw+(t.yaw-s.yaw)*p);
+    updateHUD();
+    if(p<1) requestAnimationFrame(step); else anim=false;
+  }
+  requestAnimationFrame(step);
+}
+
+// Camera orbit
+let ca=0.8, cp=0.45, cd=18, drag=false, lm={x:0,y:0};
+const cvs=renderer.domElement;
+cvs.addEventListener('mousedown',e=>{drag=true;lm={x:e.clientX,y:e.clientY};});
+window.addEventListener('mouseup',()=>drag=false);
+window.addEventListener('mousemove',e=>{
+  if(!drag) return;
+  ca-=(e.clientX-lm.x)*0.008;
+  cp=Math.max(-0.2,Math.min(1.4,cp+(e.clientY-lm.y)*0.008));
+  lm={x:e.clientX,y:e.clientY};
+});
+cvs.addEventListener('wheel',e=>{cd=Math.max(6,Math.min(40,cd+e.deltaY*0.02));e.preventDefault();},{passive:false});
+
+// Trail
+const TM=120,TP=[];
+const TG=new THREE.BufferGeometry();
+const TB=new Float32Array(TM*3);
+TG.setAttribute('position',new THREE.BufferAttribute(TB,3));
+scene.add(new THREE.Line(TG,new THREE.LineBasicMaterial({color:0xe53935,transparent:true,opacity:0.4})));
+let fc=0;
+
+function animate(){
+  requestAnimationFrame(animate);
+  camera.position.set(Math.cos(ca)*Math.cos(cp)*cd, Math.sin(cp)*cd, Math.sin(ca)*Math.cos(cp)*cd);
+  camera.lookAt(jetGroup.position);
+  const pulse=0.7+0.3*Math.sin(Date.now()*0.008);
+  glowMat.color.setRGB(pulse,0.4*pulse,0.2*pulse);
+  fc++;
+  if(fc%2===0){
+    TP.push(jetGroup.position.clone());
+    if(TP.length>TM) TP.shift();
+    for(let i=0;i<TP.length;i++){TB[i*3]=TP[i].x;TB[i*3+1]=TP[i].y;TB[i*3+2]=TP[i].z;}
+    TG.setDrawRange(0,TP.length);
+    TG.attributes.position.needsUpdate=true;
+  }
+  renderer.render(scene,camera);
+}
+updateHUD(); animate();
+</script>
+</body>
+</html>

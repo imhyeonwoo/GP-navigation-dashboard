@@ -37,11 +37,25 @@ def demo_reader(data_queue: queue.Queue, stop_event: threading.Event) -> None:
     t = 0.0
     lat_base = 37.5417
     lon_base = 127.0795
+    align_required = 5000
+    ref_lat = lat_base
+    ref_lon = lon_base
+    ref_h = 42.125
 
     while not stop_event.is_set():
         t += 0.1
-        sample = {
+        align_samples = min(int(t * 500.0), align_required)
+        align_complete = 1 if align_samples >= align_required else 0
+        bgx = 0.00012 + 0.00001 * math.sin(t * 0.3)
+        bgy = -0.00008 + 0.00001 * math.cos(t * 0.25)
+        bgz = 0.00031 + 0.00002 * math.sin(t * 0.2)
+        ned_n = 8.0 * math.sin(t * 0.12)
+        ned_e = 0.5 * t
+        ned_d = -0.4 + 0.05 * math.sin(t * 0.09)
+
+        telemetry_sample = {
             "timestamp": time.time(),
+            "kind": "telemetry",
             "fix": 3,
             "lat": lat_base + 0.0001 * math.sin(t * 0.3) + random.uniform(-0.00001, 0.00001),
             "lon": lon_base + 0.0001 * t * 0.5 + random.uniform(-0.00001, 0.00001),
@@ -62,5 +76,36 @@ def demo_reader(data_queue: queue.Queue, stop_event: threading.Event) -> None:
             "vce": 0.019 + 0.003 * abs(math.cos(t * 0.06)),
             "vcd": 0.016 + 0.001 * abs(math.sin(t * 0.08)),
         }
-        data_queue.put(sample)
+        data_queue.put(telemetry_sample)
+
+        if abs(t - 0.1) < 1.0e-6:
+            data_queue.put({
+                "timestamp": time.time(),
+                "kind": "ned_ref",
+                "ref_lat": ref_lat,
+                "ref_lon": ref_lon,
+                "ref_h": ref_h,
+                "ref_valid": 1,
+            })
+
+        data_queue.put({
+            "timestamp": time.time(),
+            "kind": "gps_ned",
+            "ned_fix": 3,
+            "ned_n": ned_n,
+            "ned_e": ned_e,
+            "ned_d": ned_d,
+        })
+
+        data_queue.put({
+            "timestamp": time.time(),
+            "kind": "align",
+            "align_samples": align_samples,
+            "align_required": align_required,
+            "bgx": bgx,
+            "bgy": bgy,
+            "bgz": bgz,
+            "align_complete": align_complete,
+        })
+
         time.sleep(0.1)
