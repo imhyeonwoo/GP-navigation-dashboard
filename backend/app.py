@@ -33,6 +33,11 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/attitude")
+def attitude_view():
+    return render_template("attitude.html")
+
+
 @app.route("/api/history")
 def api_history():
     samples = store.snapshot()

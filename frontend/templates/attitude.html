@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GNSS / INS Attitude Viewer</title>
+  <meta name="description" content="Realtime 3D attitude viewer for GNSS/INS quaternion telemetry" />
+  <link rel="stylesheet" href="/static/attitude.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <section class="canvas-shell">
+      <div class="grid-overlay"></div>
+      <div class="hud-top">Realtime Attitude Viewer</div>
+      <div class="hud-sub">NED Navigation / FRD Body Convention</div>
+      <div class="hud-status">
+        <span id="status-badge" class="status connecting">Connecting</span>
+        <span id="status-port" class="meta-chip">Port N/A</span>
+        <span id="status-baud" class="meta-chip">Baud 0</span>
+      </div>
+      <div id="canvas-container"></div>
+      <div class="axes-legend">
+        <div><span class="dot x"></span>+X = North / Forward</div>
+        <div><span class="dot y"></span>-Z = East / Right</div>
+        <div><span class="dot z"></span>+Y = Up = -Down</div>
+      </div>
+    </section>
+
+    <aside class="panel-shell">
+      <section class="panel hero-panel">
+        <div class="eyebrow">Live Quaternion</div>
+        <div id="quat-readout" class="mono big">w -, x -, y -, z -</div>
+        <div id="sample-clock" class="mono dim">t = 0.0 s</div>
+      </section>
+
+      <section class="panel angle-panel">
+        <div class="panel-title">Body Attitude</div>
+        <div class="angle-grid">
+          <div class="angle-card roll">
+            <div class="label">Roll</div>
+            <div id="roll-value" class="value">-</div>
+          </div>
+          <div class="angle-card pitch">
+            <div class="label">Pitch</div>
+            <div id="pitch-value" class="value">-</div>
+          </div>
+          <div class="angle-card yaw">
+            <div class="label">Heading</div>
+            <div id="yaw-value" class="value">-</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel info-panel">
+        <div class="panel-title">Orientation Summary</div>
+        <div class="kv-row"><span>Fix</span><span id="fix-value" class="mono">-</span></div>
+        <div class="kv-row"><span>Latitude</span><span id="lat-value" class="mono">-</span></div>
+        <div class="kv-row"><span>Longitude</span><span id="lon-value" class="mono">-</span></div>
+        <div class="kv-row"><span>Gyro</span><span id="gyro-value" class="mono">-</span></div>
+        <div class="kv-row"><span>Accel</span><span id="accel-value" class="mono">-</span></div>
+      </section>
+
+      <section class="panel note-panel">
+        <div class="panel-title">Convention</div>
+        <p>
+          The streamed quaternion is currently treated as already aligned with the vehicle body frame (FRD),
+so <code>C_IMU^b = I</code> is used for display.
+        </p>
+        <p>
+          Heading is computed from the corrected body x-axis projected onto the NED horizontal plane,
+          with 0 deg = North and 90 deg = East.
+        </p>
+        <p>
+          Left drag: orbit camera. Right drag: pan the 3D view in space. Wheel: zoom.
+        </p>
+        <a class="nav-link" href="/">Back To Dashboard</a>
+      </section>
+    </aside>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/static/attitude.js"></script>
+</body>
+</html>
