@@ -1,0 +1,210 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #07111f;
+  --panel: rgba(12, 23, 41, 0.92);
+  --border: rgba(146, 174, 209, 0.22);
+  --text: #edf4ff;
+  --muted: #91a4bf;
+  --dim: #6c819d;
+  --accent: #42d5ff;
+  --green: #35e0a1;
+  --yellow: #ffcf5a;
+  --red: #ff6e86;
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(66, 213, 255, 0.14), transparent 24%),
+    radial-gradient(circle at top right, rgba(134, 247, 184, 0.10), transparent 22%),
+    linear-gradient(180deg, #08111d 0%, #050b14 100%);
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(154, 182, 214, 0.14);
+  background: rgba(5, 12, 21, 0.84);
+  backdrop-filter: blur(16px);
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.04em;
+}
+
+.topbar-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.meta-chip,
+.status,
+.hero-summary {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(14, 24, 40, 0.95);
+  border: 1px solid rgba(153, 180, 214, 0.16);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+
+.status.connecting {
+  background: rgba(255, 207, 90, 0.14);
+  color: var(--yellow);
+  border-color: rgba(255, 207, 90, 0.3);
+}
+
+.status.streaming, .status.demo {
+  background: rgba(53, 224, 161, 0.14);
+  color: var(--green);
+  border-color: rgba(53, 224, 161, 0.3);
+}
+
+.status.error, .status.disconnected {
+  background: rgba(255, 110, 134, 0.14);
+  color: var(--red);
+  border-color: rgba(255, 110, 134, 0.3);
+}
+
+.workspace {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 14px;
+  padding: 14px;
+}
+
+.hero-panel,
+.track-panel {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(12, 23, 41, 0.98), rgba(10, 20, 36, 0.88));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+}
+
+.hero-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 20px;
+}
+
+.hero-subtitle {
+  color: var(--dim);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 6px;
+}
+
+.hero-summary {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn,
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(150, 178, 211, 0.18);
+  background: rgba(22, 35, 57, 0.92);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.action-btn:hover,
+.nav-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(77, 216, 255, 0.42);
+}
+
+.nav-link {
+  background: linear-gradient(180deg, rgba(77, 216, 255, 0.18), rgba(77, 216, 255, 0.08));
+}
+
+.nav-link.ghost {
+  background: rgba(22, 35, 57, 0.92);
+}
+
+.track-panel {
+  position: relative;
+  min-height: 0;
+  padding: 16px;
+}
+
+#track-chart {
+  width: 100%;
+  height: calc(100vh - 190px);
+}
+
+@media (max-width: 900px) {
+  .topbar,
+  .hero-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar-meta {
+    justify-content: flex-start;
+  }
+
+  #track-chart {
+    height: calc(100vh - 250px);
+  }
+}

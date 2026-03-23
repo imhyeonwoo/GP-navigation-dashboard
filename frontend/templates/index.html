@@ -21,6 +21,8 @@
 
     <div class="header-meta">
       <a href="/attitude" class="meta-link">3D Attitude</a>
+      <a href="/gps-track" class="meta-link">GPS Track</a>
+      <a href="/local-track" class="meta-link">Local N/E</a>
       <div class="meta-chip">Port <span id="hdr-port">N/A</span></div>
       <div class="meta-chip">Baud <span id="hdr-baud">0</span></div>
       <div class="meta-chip">Samples <span id="hdr-samples">0</span></div>
@@ -46,7 +48,6 @@
 
         <div class="control-block action-row">
           <button type="button" id="pause-btn" class="action-btn">Pause Scroll</button>
-          <button type="button" id="clear-track-btn" class="action-btn ghost">Clear Track</button>
         </div>
       </section>
 
@@ -75,31 +76,31 @@
             <span class="snapshot-label">Lat / Lon</span>
             <span id="info-latlon" class="snapshot-value mono">-</span>
           </div>
-          <div class="live-tile wide">
+          <div id="tile-quat" class="live-tile wide">
             <span class="snapshot-label">Quaternion</span>
             <span id="info-q" class="snapshot-value mono">-</span>
           </div>
-          <div class="live-tile wide">
+          <div id="tile-gyro" class="live-tile wide">
             <span class="snapshot-label">Gyroscope</span>
             <span id="info-g" class="snapshot-value mono">-</span>
           </div>
-          <div class="live-tile wide">
+          <div id="tile-accel" class="live-tile wide">
             <span class="snapshot-label">Accelerometer</span>
             <span id="info-a" class="snapshot-value mono">-</span>
           </div>
-          <div class="live-tile wide">
+          <div id="tile-pcov" class="live-tile wide">
             <span class="snapshot-label">Position Covariance</span>
             <span id="info-pcov" class="snapshot-value mono">-</span>
           </div>
-          <div class="live-tile wide">
+          <div id="tile-vcov" class="live-tile wide">
             <span class="snapshot-label">Velocity Covariance</span>
             <span id="info-vcov" class="snapshot-value mono">-</span>
           </div>
-          <div class="live-tile wide">
+          <div id="tile-ned" class="live-tile wide">
             <span class="snapshot-label">Local NED</span>
             <span id="info-ned" class="snapshot-value mono">-</span>
           </div>
-          <div class="live-tile wide">
+          <div id="tile-align" class="live-tile wide">
             <span class="snapshot-label">Align Bias</span>
             <span id="info-align" class="snapshot-value mono">-</span>
           </div>
@@ -107,21 +108,47 @@
             <span class="snapshot-label">NED Reference</span>
             <span id="info-ref" class="snapshot-value mono">-</span>
           </div>
+          <div id="tile-prop-accel" class="live-tile wide">
+            <span class="snapshot-label">INS Accel N/E</span>
+            <span id="info-prop-accel" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-prop-vel" class="live-tile wide">
+            <span class="snapshot-label">INS Vel N/E</span>
+            <span id="info-prop-vel" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-prop-pos" class="live-tile wide">
+            <span class="snapshot-label">INS Pos N/E</span>
+            <span id="info-prop-pos" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-prop-rate" class="live-tile wide">
+            <span class="snapshot-label">INS Rate</span>
+            <span id="info-prop-rate" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-ins-fb" class="live-tile wide">
+            <span class="snapshot-label">INS Specific Force</span>
+            <span id="info-ins-fb" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-ins-an" class="live-tile wide">
+            <span class="snapshot-label">INS Nav Accel</span>
+            <span id="info-ins-an" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-ins-sigma" class="live-tile wide">
+            <span class="snapshot-label">INS Sigma</span>
+            <span id="info-ins-sigma" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-corr-y" class="live-tile wide">
+            <span class="snapshot-label">GPS Innovation</span>
+            <span id="info-corr-y" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-corr-dx" class="live-tile wide">
+            <span class="snapshot-label">Correction Delta</span>
+            <span id="info-corr-dx" class="snapshot-value mono">-</span>
+          </div>
         </div>
       </section>
 
       <section class="plot-matrix">
-        <article class="panel plot-panel track-panel">
-          <div class="panel-title-row">
-            <h2>GPS Track</h2>
-            <span class="panel-subtitle">Longitude vs Latitude</span>
-          </div>
-          <div class="chart-wrap matrix-chart track-wrap">
-            <canvas id="chart-track"></canvas>
-          </div>
-        </article>
-
-        <article class="panel plot-panel">
+        <article id="panel-quat" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Quaternion</h2>
             <span id="summary-quat" class="plot-summary">qw -, qx -, qy -, qz -</span>
@@ -129,7 +156,7 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-quat"></canvas></div>
         </article>
 
-        <article class="panel plot-panel">
+        <article id="panel-gyro" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Gyroscope</h2>
             <span id="summary-gyro" class="plot-summary">gx -, gy -, gz -</span>
@@ -137,7 +164,7 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-gyro"></canvas></div>
         </article>
 
-        <article class="panel plot-panel">
+        <article id="panel-accel" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Accelerometer</h2>
             <span id="summary-accel" class="plot-summary">ax -, ay -, az -</span>
@@ -145,7 +172,7 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-accel"></canvas></div>
         </article>
 
-        <article class="panel plot-panel">
+        <article id="panel-pcov" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Position Covariance</h2>
             <span id="summary-pcov" class="plot-summary">pcn -, pce -, pcd -</span>
@@ -153,7 +180,7 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-pcov"></canvas></div>
         </article>
 
-        <article class="panel plot-panel">
+        <article id="panel-vcov" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Velocity Covariance</h2>
             <span id="summary-vcov" class="plot-summary">vcn -, vce -, vcd -</span>
@@ -161,7 +188,7 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-vcov"></canvas></div>
         </article>
 
-        <article class="panel plot-panel">
+        <article id="panel-ned" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>GPS NED</h2>
             <span id="summary-ned" class="plot-summary">N -, E -, D -</span>
@@ -169,12 +196,100 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-ned"></canvas></div>
         </article>
 
-        <article class="panel plot-panel">
+        <article id="panel-align" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Alignment Bias</h2>
             <span id="summary-align" class="plot-summary">bgx -, bgy -, bgz -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-align"></canvas></div>
+        </article>
+
+        <article id="panel-prop-accel" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>INS Acceleration</h2>
+            <span id="summary-prop-accel" class="plot-summary">aN -, aE -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-prop-accel"></canvas></div>
+        </article>
+
+        <article id="panel-prop-vel" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>INS Velocity</h2>
+            <span id="summary-prop-vel" class="plot-summary">vN -, vE -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-prop-vel"></canvas></div>
+        </article>
+
+        <article id="panel-prop-pos" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>INS Position</h2>
+            <span id="summary-prop-pos" class="plot-summary">pN -, pE -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-prop-pos"></canvas></div>
+        </article>
+
+        <article id="panel-prop-rate" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>INS Rate</h2>
+            <span id="summary-prop-rate" class="plot-summary">dt -, Hz -, avg -, min -, max -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-prop-rate"></canvas></div>
+        </article>
+
+        <article id="panel-ins-fb" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>INS Specific Force</h2>
+            <span id="summary-ins-fb" class="plot-summary">fbx -, fby -, fbz -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-ins-fb"></canvas></div>
+        </article>
+
+        <article id="panel-ins-an" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>INS Nav Accel</h2>
+            <span id="summary-ins-an" class="plot-summary">aN -, aE -, aD -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-ins-an"></canvas></div>
+        </article>
+
+        <article id="panel-ins-sigma" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>INS Sigma</h2>
+            <span id="summary-ins-sigma" class="plot-summary">sigPn -, sigPe -, sigVn -, sigVe -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-ins-sigma"></canvas></div>
+        </article>
+
+        <article id="panel-corr-z" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>GPS Correction z</h2>
+            <span id="summary-corr-z" class="plot-summary">zPn -, zPe -, zVn -, zVe -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-corr-z"></canvas></div>
+        </article>
+
+        <article id="panel-corr-y" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>GPS Innovation</h2>
+            <span id="summary-corr-y" class="plot-summary">yPn -, yPe -, yVn -, yVe -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-corr-y"></canvas></div>
+        </article>
+
+        <article id="panel-corr-dx" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Correction Delta</h2>
+            <span id="summary-corr-dx" class="plot-summary">dxPn -, dxPe -, dxVn -, dxVe -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-corr-dx"></canvas></div>
+        </article>
+
+        <article id="panel-corr-x" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Corrected State</h2>
+            <span id="summary-corr-x" class="plot-summary">xPn -, xPe -, xVn -, xVe -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-corr-x"></canvas></div>
         </article>
       </section>
     </section>

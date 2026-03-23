@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GNSS / INS Track Viewer</title>
+  <meta name="description" content="Large-format GPS and local N/E track viewer" />
+  <link rel="stylesheet" href="/static/track.css" />
+</head>
+<body data-track-mode="{{ track_mode }}">
+  <div class="page-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Realtime Track Viewer</p>
+        <h1 id="page-title">Track</h1>
+      </div>
+      <div class="topbar-meta">
+        <span id="status-badge" class="status connecting">Connecting</span>
+        <span id="status-port" class="meta-chip">Port N/A</span>
+        <span id="status-baud" class="meta-chip">Baud 0</span>
+        <span id="sample-clock" class="meta-chip">t = 0.0 s</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <div id="hero-subtitle" class="hero-subtitle">Track</div>
+          <div id="hero-summary" class="hero-summary mono">Waiting for data</div>
+        </div>
+        <div class="hero-actions">
+          <button type="button" id="clear-btn" class="action-btn">Clear Track</button>
+          <a href="/" class="nav-link">Dashboard</a>
+          <a href="/attitude" class="nav-link ghost">3D Attitude</a>
+        </div>
+      </section>
+
+      <section class="track-panel">
+        <canvas id="track-chart"></canvas>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/static/track.js"></script>
+</body>
+</html>

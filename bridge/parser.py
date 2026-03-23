@@ -1,4 +1,5 @@
-﻿import re
+import math
+import re
 import time
 from typing import Optional
 
@@ -30,6 +31,38 @@ NED_REF_PATTERN = re.compile(
 GPS_NED_PATTERN = re.compile(
     r"GPS_NED\s+fix=(?P<ned_fix>\d+)\s+"
     r"ned=\[(?P<ned_n>-?\d+\.\d+),(?P<ned_e>-?\d+\.\d+),(?P<ned_d>-?\d+\.\d+)\]"
+)
+
+PROPAGATION_PATTERN = re.compile(
+    r"PROP\s+dt=(?P<prop_dt>-?\d+\.\d+)\s+"
+    r"(?:rate=(?P<prop_rate_hz>-?\d+\.\d+)Hz\s+"
+    r"avg=(?P<prop_avg_dt>-?\d+\.\d+)\s+"
+    r"min=(?P<prop_min_dt>-?\d+\.\d+)\s+"
+    r"max=(?P<prop_max_dt>-?\d+\.\d+)\s+)?"
+    r"a_ne=\[(?P<prop_an>-?\d+\.\d+),(?P<prop_ae>-?\d+\.\d+)\]"
+    r"(?:\s+v_ne=\[(?P<prop_vn>-?\d+\.\d+),(?P<prop_ve>-?\d+\.\d+)\]\s+"
+    r"p_ne=\[(?P<prop_pn>-?\d+\.\d+),(?P<prop_pe>-?\d+\.\d+)\])?"
+)
+
+PROPAGATION_FIRST_PATTERN = re.compile(
+    r"PROP\s+first\s+dt=(?P<prop_dt>-?\d+\.\d+)\s+"
+    r"a_ne=\[(?P<prop_an>-?\d+\.\d+),(?P<prop_ae>-?\d+\.\d+)\]"
+)
+
+INS_CHECK_PATTERN = re.compile(
+    r"INSCHK\s+fb_b=\[(?P<ins_fb_x>-?\d+\.\d+),(?P<ins_fb_y>-?\d+\.\d+),(?P<ins_fb_z>-?\d+\.\d+)\]\s+"
+    r"a_n=\[(?P<ins_an>-?\d+\.\d+),(?P<ins_ae>-?\d+\.\d+),(?P<ins_ad>-?\d+\.\d+)\]\s+"
+    r"v_ne=\[(?P<ins_vn>-?\d+\.\d+),(?P<ins_ve>-?\d+\.\d+)\]\s+"
+    r"p_ne=\[(?P<ins_pn>-?\d+\.\d+),(?P<ins_pe>-?\d+\.\d+)\]\s+"
+    r"b_a=\[(?P<ins_bax>-?\d+\.\d+),(?P<ins_bay>-?\d+\.\d+)\]\s+"
+    r"Pdiag=\[(?P<ins_pdiag_pn>-?\d+\.\d+),(?P<ins_pdiag_pe>-?\d+\.\d+),(?P<ins_pdiag_vn>-?\d+\.\d+),(?P<ins_pdiag_ve>-?\d+\.\d+)\]"
+)
+
+GPS_CORRECTION_PATTERN = re.compile(
+    r"GPSCOR\s+z=\[(?P<corr_z_pn>-?\d+\.\d+),(?P<corr_z_pe>-?\d+\.\d+),(?P<corr_z_vn>-?\d+\.\d+),(?P<corr_z_ve>-?\d+\.\d+)\]\s+"
+    r"y=\[(?P<corr_y_pn>-?\d+\.\d+),(?P<corr_y_pe>-?\d+\.\d+),(?P<corr_y_vn>-?\d+\.\d+),(?P<corr_y_ve>-?\d+\.\d+)\]\s+"
+    r"dx=\[(?P<corr_dx_pn>-?\d+\.\d+),(?P<corr_dx_pe>-?\d+\.\d+),(?P<corr_dx_vn>-?\d+\.\d+),(?P<corr_dx_ve>-?\d+\.\d+)\]\s+"
+    r"x=\[(?P<corr_x_pn>-?\d+\.\d+),(?P<corr_x_pe>-?\d+\.\d+),(?P<corr_x_vn>-?\d+\.\d+),(?P<corr_x_ve>-?\d+\.\d+)\]"
 )
 
 
@@ -94,6 +127,40 @@ def parse_line(line: str) -> Optional[dict]:
             "ned_d": float(match.group("ned_d")),
             "kind": "gps_ned",
         }
+        return _with_timestamp(values)
+
+    match = PROPAGATION_PATTERN.search(text)
+    if match is not None:
+        values = {"kind": "propagation"}
+        for key, value in match.groupdict().items():
+            if value is not None:
+                values[key] = float(value)
+        return _with_timestamp(values)
+
+    match = PROPAGATION_FIRST_PATTERN.search(text)
+    if match is not None:
+        values = {
+            "prop_dt": float(match.group("prop_dt")),
+            "prop_an": float(match.group("prop_an")),
+            "prop_ae": float(match.group("prop_ae")),
+            "kind": "propagation",
+        }
+        return _with_timestamp(values)
+
+    match = INS_CHECK_PATTERN.search(text)
+    if match is not None:
+        values = {key: float(value) for key, value in match.groupdict().items()}
+        values["ins_sig_pn"] = math.sqrt(max(values["ins_pdiag_pn"], 0.0))
+        values["ins_sig_pe"] = math.sqrt(max(values["ins_pdiag_pe"], 0.0))
+        values["ins_sig_vn"] = math.sqrt(max(values["ins_pdiag_vn"], 0.0))
+        values["ins_sig_ve"] = math.sqrt(max(values["ins_pdiag_ve"], 0.0))
+        values["kind"] = "ins_check"
+        return _with_timestamp(values)
+
+    match = GPS_CORRECTION_PATTERN.search(text)
+    if match is not None:
+        values = {key: float(value) for key, value in match.groupdict().items()}
+        values["kind"] = "gps_correction"
         return _with_timestamp(values)
 
     return None

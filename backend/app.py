@@ -38,6 +38,16 @@ def attitude_view():
     return render_template("attitude.html")
 
 
+@app.route("/gps-track")
+def gps_track_view():
+    return render_template("track.html", track_mode="gps")
+
+
+@app.route("/local-track")
+def local_track_view():
+    return render_template("track.html", track_mode="local")
+
+
 @app.route("/api/history")
 def api_history():
     samples = store.snapshot()
