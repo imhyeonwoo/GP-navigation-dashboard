@@ -111,9 +111,9 @@ function mat3Transpose(matrix) {
 }
 
 const C_IMU_TO_BODY = [
-  [1.0, 0.0, 0.0],
   [0.0, 1.0, 0.0],
-  [0.0, 0.0, 1.0],
+  [1.0, 0.0, 0.0],
+  [0.0, 0.0, -1.0],
 ];
 
 const BODY_TO_THREE = [
@@ -123,8 +123,7 @@ const BODY_TO_THREE = [
 ];
 
 function quaternionToBodyPoseDegrees(qw, qx, qy, qz) {
-  const cNavToImu = quaternionToDcm(qw, qx, qy, qz);
-  const cImuToNav = mat3Transpose(cNavToImu);
+  const cImuToNav = quaternionToDcm(qw, qx, qy, qz);
   const cBodyToNav = mat3Multiply(cImuToNav, mat3Transpose(C_IMU_TO_BODY));
 
   const roll = Math.atan2(cBodyToNav[2][1], cBodyToNav[2][2]) * (180.0 / Math.PI);
