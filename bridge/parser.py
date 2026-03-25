@@ -65,6 +65,15 @@ GPS_CORRECTION_PATTERN = re.compile(
     r"x=\[(?P<corr_x_pn>-?\d+\.\d+),(?P<corr_x_pe>-?\d+\.\d+),(?P<corr_x_vn>-?\d+\.\d+),(?P<corr_x_ve>-?\d+\.\d+)\]"
 )
 
+VERTICAL_PATTERN = re.compile(
+    r"VERT\s+z_d_est=(?P<vert_zd_est>-?\d+\.\d+)\s+"
+    r"alt=(?P<vert_alt>-?\d+\.\d+)\s+"
+    r"vz_d=(?P<vert_vzd>-?\d+\.\d+)\s+"
+    r"a_d_raw=(?P<vert_ad_raw>-?\d+\.\d+)\s+"
+    r"a_d_lpf=(?P<vert_ad_lpf>-?\d+\.\d+)\s+"
+    r"z_d_baro=(?P<vert_zd_baro>-?\d+\.\d+)"
+)
+
 
 def _with_timestamp(values: dict) -> dict:
     values["timestamp"] = time.time()
@@ -161,6 +170,12 @@ def parse_line(line: str) -> Optional[dict]:
     if match is not None:
         values = {key: float(value) for key, value in match.groupdict().items()}
         values["kind"] = "gps_correction"
+        return _with_timestamp(values)
+
+    match = VERTICAL_PATTERN.search(text)
+    if match is not None:
+        values = {key: float(value) for key, value in match.groupdict().items()}
+        values["kind"] = "vertical"
         return _with_timestamp(values)
 
     return None

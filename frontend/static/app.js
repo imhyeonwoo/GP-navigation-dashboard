@@ -191,6 +191,26 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
+    title: 'Vertical Position',
+    subtitle: 'NED down estimate vs barometer',
+    chart: 'vert-pos',
+    panelId: 'panel-vert-pos',
+    signals: [
+      { key: 'vert_zd_est', label: 'zD_est', color: '--c-prop-pn', decimals: 4 },
+      { key: 'vert_zd_baro', label: 'zD_baro', color: '--c-ned-d', decimals: 4 },
+    ],
+  },
+  {
+    title: 'Vertical Acceleration',
+    subtitle: 'Raw vs LPF a_d',
+    chart: 'vert-accel',
+    panelId: 'panel-vert-accel',
+    signals: [
+      { key: 'vert_ad_raw', label: 'aRaw', color: '--c-ins-fbz', decimals: 4 },
+      { key: 'vert_ad_lpf', label: 'aLPF', color: '--c-ins-ad', decimals: 4 },
+    ],
+  },
+  {
     title: 'INS Covariance Sigma',
     subtitle: '1-sigma from P diag',
     chart: 'ins-sigma',
@@ -317,6 +337,8 @@ const dom = {
   summaryPropRate: document.getElementById('summary-prop-rate'),
   summaryInsFb: document.getElementById('summary-ins-fb'),
   summaryInsAn: document.getElementById('summary-ins-an'),
+  summaryVertPos: document.getElementById('summary-vert-pos'),
+  summaryVertAccel: document.getElementById('summary-vert-accel'),
   summaryInsSigma: document.getElementById('summary-ins-sigma'),
   summaryCorrZ: document.getElementById('summary-corr-z'),
   summaryCorrY: document.getElementById('summary-corr-y'),
@@ -643,6 +665,8 @@ function updateSummary(sample, timeValue) {
   dom.summaryPropRate.textContent = `dt ${formatNumber(sample.prop_dt, 4)}  Hz ${formatNumber(sample.prop_rate_hz, 3)}  avg ${formatNumber(sample.prop_avg_dt, 4)}  min ${formatNumber(sample.prop_min_dt, 4)}  max ${formatNumber(sample.prop_max_dt, 4)}`;
   dom.summaryInsFb.textContent = `fbx ${formatNumber(sample.ins_fb_x, 4)}  fby ${formatNumber(sample.ins_fb_y, 4)}  fbz ${formatNumber(sample.ins_fb_z, 4)}`;
   dom.summaryInsAn.textContent = `aN ${formatNumber(sample.ins_an, 4)}  aE ${formatNumber(sample.ins_ae, 4)}  aD ${formatNumber(sample.ins_ad, 4)}`;
+  dom.summaryVertPos.textContent = `zD_est ${formatNumber(sample.vert_zd_est, 3)}  zD_baro ${formatNumber(sample.vert_zd_baro, 3)}  alt ${formatNumber(sample.vert_alt, 3)}  vzD ${formatNumber(sample.vert_vzd, 3)}`;
+  dom.summaryVertAccel.textContent = `aRaw ${formatNumber(sample.vert_ad_raw, 3)}  aLPF ${formatNumber(sample.vert_ad_lpf, 3)}`;
   dom.summaryInsSigma.textContent = `sigPn ${formatNumber(sample.ins_sig_pn, 3)}  sigPe ${formatNumber(sample.ins_sig_pe, 3)}  sigVn ${formatNumber(sample.ins_sig_vn, 3)}  sigVe ${formatNumber(sample.ins_sig_ve, 3)}`;
   dom.summaryCorrZ.textContent = `zPn ${formatNumber(sample.corr_z_pn, 3)}  zPe ${formatNumber(sample.corr_z_pe, 3)}  zVn ${formatNumber(sample.corr_z_vn, 3)}  zVe ${formatNumber(sample.corr_z_ve, 3)}`;
   dom.summaryCorrY.textContent = `yPn ${formatNumber(sample.corr_y_pn, 3)}  yPe ${formatNumber(sample.corr_y_pe, 3)}  yVn ${formatNumber(sample.corr_y_vn, 3)}  yVe ${formatNumber(sample.corr_y_ve, 3)}`;
