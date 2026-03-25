@@ -44,6 +44,34 @@ body {
   inset: 0;
 }
 
+.axis-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.axis-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 42px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(133, 158, 194, 0.18);
+  background: rgba(8, 15, 27, 0.88);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.axis-label.x-axis { color: #ff8ca1; }
+.axis-label.y-axis { color: #7dffcf; }
+.axis-label.z-axis { color: #8fc1ff; }
+
 .grid-overlay {
   position: absolute;
   inset: 0;
@@ -201,6 +229,74 @@ body {
 .angle-grid {
   display: grid;
   gap: 10px;
+}
+
+.frame-browser {
+  display: grid;
+  gap: 6px;
+}
+
+.frame-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: rgba(8, 16, 29, 0.75);
+}
+
+.signal-toggle {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border-radius: 4px;
+  border: 1px solid rgba(166, 194, 230, 0.32);
+  background: rgba(7, 17, 31, 0.95);
+  cursor: pointer;
+  position: relative;
+}
+
+.signal-toggle:checked {
+  border-color: rgba(66, 213, 255, 0.48);
+  background: rgba(66, 213, 255, 0.18);
+}
+
+.signal-toggle:checked::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.frame-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.frame-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.frame-swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.frame-desc {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .angle-card {

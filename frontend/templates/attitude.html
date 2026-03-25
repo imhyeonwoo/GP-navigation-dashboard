@@ -12,17 +12,18 @@
     <section class="canvas-shell">
       <div class="grid-overlay"></div>
       <div class="hud-top">Realtime Attitude Viewer</div>
-      <div class="hud-sub">NED Navigation / FRD Body Convention</div>
+      <div class="hud-sub">NED Navigation / IMU-mounted Vehicle View</div>
       <div class="hud-status">
         <span id="status-badge" class="status connecting">Connecting</span>
         <span id="status-port" class="meta-chip">Port N/A</span>
         <span id="status-baud" class="meta-chip">Baud 0</span>
       </div>
       <div id="canvas-container"></div>
+      <div id="axis-overlay" class="axis-overlay" aria-hidden="true"></div>
       <div class="axes-legend">
-        <div><span class="dot x"></span>+X = North / Forward</div>
-        <div><span class="dot y"></span>-Z = East / Right</div>
-        <div><span class="dot z"></span>+Y = Up = -Down</div>
+        <div><span class="dot x"></span>X-axis color</div>
+        <div><span class="dot y"></span>Y-axis color</div>
+        <div><span class="dot z"></span>Z-axis color</div>
       </div>
     </section>
 
@@ -34,7 +35,7 @@
       </section>
 
       <section class="panel angle-panel">
-        <div class="panel-title">Body Attitude</div>
+        <div class="panel-title">FRD Body Euler</div>
         <div class="angle-grid">
           <div class="angle-card roll">
             <div class="label">Roll</div>
@@ -51,6 +52,11 @@
         </div>
       </section>
 
+      <section class="panel frame-panel">
+        <div class="panel-title">Coordinate Frames</div>
+        <div id="frame-browser" class="frame-browser"></div>
+      </section>
+
       <section class="panel info-panel">
         <div class="panel-title">Orientation Summary</div>
         <div class="kv-row"><span>Fix</span><span id="fix-value" class="mono">-</span></div>
@@ -63,12 +69,25 @@
       <section class="panel note-panel">
         <div class="panel-title">Convention</div>
         <p>
-          The streamed quaternion is currently treated as already aligned with the vehicle body frame (FRD),
-so <code>C_IMU^b = I</code> is used for display.
+          The streamed quaternion is interpreted as the IMU attitude matrix <code>C_imu_to_n</code>.
+          The displayed aircraft mesh follows the mounted IMU frame
+          <code>i: +x forward, +y left, +z up</code>.
         </p>
         <p>
-          Heading is computed from the corrected body x-axis projected onto the NED horizontal plane,
-          with 0 deg = North and 90 deg = East.
+          The optional FRD body frame is derived separately with
+          <code>C_IMU_to_b = diag(1,-1,-1)</code>.
+        </p>
+        <p>
+          The FRD body attitude is computed as <code>C_b_to_n = C_imu_to_n * C_b_to_imu</code>,
+          where <code>C_b_to_imu = C_IMU_to_b^T = C_IMU_to_b</code>.
+        </p>
+        <p>
+          The roll, pitch, yaw cards are the derived <code>b-frame</code> ZYX yaw-pitch-roll values,
+          and yaw is shown as a signed angle in <code>[-180, 180]</code>.
+        </p>
+        <p>
+          Each rendered frame has explicit axis labels. Use the coordinate-frame toggles
+          to hide any frame you do not want to see.
         </p>
         <p>
           Left drag: orbit camera. Right drag: pan the 3D view in space. Wheel: zoom.
