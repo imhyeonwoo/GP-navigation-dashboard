@@ -69,17 +69,22 @@
       <section class="panel note-panel">
         <div class="panel-title">Convention</div>
         <p>
-          The streamed quaternion is interpreted as the IMU attitude matrix <code>C_imu_to_n</code>.
-          The displayed aircraft mesh follows the mounted IMU frame
-          <code>i: +x forward, +y left, +z up</code>.
+          The streamed quaternion is interpreted as the FRD body attitude matrix <code>C_b_to_n</code>.
+          The displayed body frame therefore follows
+          <code>b: +x forward, +y right, +z down</code>.
         </p>
         <p>
-          The optional FRD body frame is derived separately with
+          The aircraft mesh intentionally stays in the mounted IMU <code>FLU</code> convention,
+          so the vehicle is not flipped upside-down just to match the formal body-frame sign convention.
+          The bright wingtip marker shows <code>+i_y</code> / left.
+        </p>
+        <p>
+          The optional IMU sensor frame is derived with
           <code>C_IMU_to_b = diag(1,-1,-1)</code>.
         </p>
         <p>
-          The FRD body attitude is computed as <code>C_b_to_n = C_imu_to_n * C_b_to_imu</code>,
-          where <code>C_b_to_imu = C_IMU_to_b^T = C_IMU_to_b</code>.
+          The IMU attitude is computed as <code>C_imu_to_n = C_b_to_n * C_IMU_to_b</code>,
+          where <code>C_IMU_to_b^T = C_IMU_to_b</code>.
         </p>
         <p>
           The roll, pitch, yaw cards are the derived <code>b-frame</code> ZYX yaw-pitch-roll values,
@@ -87,7 +92,8 @@
         </p>
         <p>
           Each rendered frame has explicit axis labels. Use the coordinate-frame toggles
-          to hide any frame you do not want to see.
+          to hide any frame you do not want to see. The aircraft mesh can also be toggled
+          separately when you want to inspect only the axes.
         </p>
         <p>
           Left drag: orbit camera. Right drag: pan the 3D view in space. Wheel: zoom.

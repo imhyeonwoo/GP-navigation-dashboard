@@ -7,6 +7,7 @@ const state = {
     imu: true,
     body: true,
   },
+  vehicleVisible: true,
 };
 
 const dom = {
@@ -39,22 +40,23 @@ const C_IMU_TO_BODY = [
   [0.0, 0.0, -1.0],
 ];
 
+// Use proper right-handed frame embeddings for Three.js rendering.
 const NED_TO_THREE = [
   [1.0, 0.0, 0.0],
   [0.0, 0.0, -1.0],
-  [0.0, -1.0, 0.0],
+  [0.0, 1.0, 0.0],
 ];
 
 const IMU_TO_THREE = [
   [1.0, 0.0, 0.0],
   [0.0, 0.0, 1.0],
-  [0.0, 1.0, 0.0],
+  [0.0, -1.0, 0.0],
 ];
 
 const BODY_TO_THREE = [
   [1.0, 0.0, 0.0],
   [0.0, 0.0, -1.0],
-  [0.0, -1.0, 0.0],
+  [0.0, 1.0, 0.0],
 ];
 
 const AXIS_COLORS = {
@@ -214,8 +216,8 @@ function mat3Transpose(matrix) {
 }
 
 function quaternionToPoseDegrees(qw, qx, qy, qz) {
-  const dcmImuToNav = quaternionToDcm(qw, qx, qy, qz);
-  const dcmBodyToNav = mat3Multiply(dcmImuToNav, mat3Transpose(C_IMU_TO_BODY));
+  const dcmBodyToNav = quaternionToDcm(qw, qx, qy, qz);
+  const dcmImuToNav = mat3Multiply(dcmBodyToNav, C_IMU_TO_BODY);
 
   const roll = wrapTo180(Math.atan2(dcmBodyToNav[2][1], dcmBodyToNav[2][2]) * (180.0 / Math.PI));
   const pitch = Math.asin(Math.max(-1.0, Math.min(1.0, -dcmBodyToNav[2][0]))) * (180.0 / Math.PI);
@@ -272,7 +274,9 @@ function makeFrameTriad(axisLength, opacity, originColor, frameToThree) {
 }
 
 function setObjectQuaternionFromDcm(object3d, cFrameToNav, frameToThree) {
-  const cThree = mat3Multiply(mat3Multiply(frameToThree, cFrameToNav), mat3Transpose(frameToThree));
+  // World space is always anchored to the rendered NED frame.
+  // The local object geometry may use a different axis embedding.
+  const cThree = mat3Multiply(mat3Multiply(NED_TO_THREE, cFrameToNav), mat3Transpose(frameToThree));
   const matrix = new THREE.Matrix4();
   matrix.set(
     cThree[0][0], cThree[0][1], cThree[0][2], 0.0,
@@ -324,6 +328,34 @@ function buildFrameBrowser() {
     fragment.append(row);
   }
 
+  const meshRow = document.createElement('label');
+  meshRow.className = 'frame-row';
+  meshRow.htmlFor = 'frame-toggle-vehicle';
+
+  const meshToggle = document.createElement('input');
+  meshToggle.type = 'checkbox';
+  meshToggle.id = 'frame-toggle-vehicle';
+  meshToggle.className = 'signal-toggle';
+  meshToggle.checked = state.vehicleVisible;
+  meshToggle.addEventListener('change', () => {
+    setVehicleVisibility(meshToggle.checked);
+  });
+
+  const meshMeta = document.createElement('div');
+  meshMeta.className = 'frame-meta';
+
+  const meshName = document.createElement('div');
+  meshName.className = 'frame-name';
+  meshName.innerHTML = '<span class="frame-swatch" style="color:#4dd8ff; background:#4dd8ff"></span>aircraft mesh';
+
+  const meshDesc = document.createElement('div');
+  meshDesc.className = 'frame-desc';
+  meshDesc.textContent = 'Visual airframe model aligned to the IMU FLU convention';
+
+  meshMeta.append(meshName, meshDesc);
+  meshRow.append(meshToggle, meshMeta);
+  fragment.append(meshRow);
+
   dom.frameBrowser.replaceChildren(fragment);
 }
 
@@ -335,6 +367,11 @@ function setFrameVisibility(frameKey, visible) {
   }
 
   updateAxisLabels();
+}
+
+function setVehicleVisibility(visible) {
+  state.vehicleVisible = visible;
+  vehicle.visible = visible;
 }
 
 function resize() {
@@ -395,6 +432,10 @@ vehicle.add(canopy);
 const wing = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.08, 5.4), bodyMat);
 wing.position.set(0.2, 0, 0);
 vehicle.add(wing);
+
+const leftWingTipMarker = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.18, 0.22), accentMat);
+leftWingTipMarker.position.set(0.25, 0.16, -2.82);
+vehicle.add(leftWingTipMarker);
 
 const tailFin = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.1, 0.08), darkMat);
 tailFin.position.set(-1.9, 0.6, 0);
@@ -559,6 +600,7 @@ function updateReadout(sample, timeValue) {
 
   setObjectQuaternionFromDcm(frameObjects.imu.group, pose.dcmImuToNav, IMU_TO_THREE);
   setObjectQuaternionFromDcm(frameObjects.body.group, pose.dcmBodyToNav, BODY_TO_THREE);
+  // Keep the aircraft mesh in the mounted IMU FLU convention.
   setObjectQuaternionFromDcm(vehicle, pose.dcmImuToNav, IMU_TO_THREE);
 }
 
@@ -633,6 +675,7 @@ buildFrameBrowser();
 setFrameVisibility('nav', state.frameVisibility.nav);
 setFrameVisibility('imu', state.frameVisibility.imu);
 setFrameVisibility('body', state.frameVisibility.body);
+setVehicleVisibility(state.vehicleVisible);
 resize();
 renderLoop();
 loadHistory();
