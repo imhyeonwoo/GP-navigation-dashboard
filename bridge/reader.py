@@ -6,15 +6,16 @@ import time
 
 import serial
 
-from .parser import parse_line
+from .parser import TelemetryStreamParser
 
 
 def serial_reader(port: str, baud: int, data_queue: queue.Queue, stop_event: threading.Event) -> None:
     try:
         with serial.Serial(port, baud, timeout=0.5) as serial_port:
+            parser = TelemetryStreamParser()
             while not stop_event.is_set():
                 try:
-                    raw = serial_port.readline()
+                    raw = serial_port.read(serial_port.in_waiting or 1)
                 except serial.SerialException as exc:
                     data_queue.put({"error": f"Serial error: {exc}"})
                     return
@@ -22,12 +23,7 @@ def serial_reader(port: str, baud: int, data_queue: queue.Queue, stop_event: thr
                 if not raw:
                     continue
 
-                line = raw.decode("utf-8", errors="ignore").strip()
-                if not line:
-                    continue
-
-                sample = parse_line(line)
-                if sample is not None:
+                for sample in parser.feed(raw):
                     data_queue.put(sample)
     except serial.SerialException as exc:
         data_queue.put({"error": f"Cannot open port {port}: {exc}"})

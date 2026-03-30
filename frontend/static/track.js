@@ -7,6 +7,7 @@ const state = {
   latestTime: 0,
   gpsRefLat: null,
   gpsRefLon: null,
+  localGpsSource: null,
   latestGpsPoint: null,
   latestInsPoint: null,
 };
@@ -86,15 +87,24 @@ function projectGpsToMeters(lat, lon) {
 }
 
 function localGpsPointFromSample(sample) {
-  if (Number.isFinite(sample.ned_e) && Number.isFinite(sample.ned_n)) {
+  if (sample?.kind === 'gps_ned' && Number.isFinite(sample.ned_e) && Number.isFinite(sample.ned_n)) {
     return { x: sample.ned_e, y: sample.ned_n };
   }
 
-  if (Number.isFinite(sample.lat) && Number.isFinite(sample.lon)) {
+  if (state.localGpsSource === 'ned') {
+    return null;
+  }
+
+  if (sample?.kind === 'telemetry' && Number.isFinite(sample.lat) && Number.isFinite(sample.lon)) {
     return projectGpsToMeters(sample.lat, sample.lon);
   }
 
   return null;
+}
+
+function resetGpsTrackDatasets() {
+  chart.data.datasets[0].data.length = 0;
+  chart.data.datasets[2].data.length = 0;
 }
 
 function makeChart() {
@@ -262,6 +272,13 @@ function mergeSample(sample) {
 
 function pushPoint(sample) {
   if (mode === 'local') {
+    if (sample?.kind === 'gps_ned' && state.localGpsSource !== 'ned') {
+      state.localGpsSource = 'ned';
+      resetGpsTrackDatasets();
+    } else if (sample?.kind === 'telemetry' && state.localGpsSource == null) {
+      state.localGpsSource = 'projected';
+    }
+
     const gpsPoint = localGpsPointFromSample(sample);
     if (gpsPoint) {
       state.latestGpsPoint = gpsPoint;
@@ -384,6 +401,7 @@ function clearTrack() {
   }
   state.gpsRefLat = null;
   state.gpsRefLon = null;
+  state.localGpsSource = null;
   state.latestGpsPoint = null;
   state.latestInsPoint = null;
   chart.options.scales.x.min = undefined;
