@@ -52,12 +52,6 @@ def demo_reader(data_queue: queue.Queue, stop_event: threading.Event) -> None:
         ned_n = 8.0 * math.sin(t * 0.12)
         ned_e = 0.5 * t
         ned_d = -0.4 + 0.05 * math.sin(t * 0.09)
-        vert_zd_est = -0.8 + 0.18 * math.sin(t * 0.22)
-        vert_zd_baro = vert_zd_est + 0.05 * math.sin(t * 1.4)
-        vert_vzd = 0.18 * 0.22 * math.cos(t * 0.22)
-        vert_ad_raw = 0.05 * math.sin(t * 5.0) + 0.02 * math.sin(t * 11.0)
-        vert_ad_lpf = 0.85 * vert_ad_raw + 0.15 * (0.05 * math.sin((t - 0.1) * 5.0) + 0.02 * math.sin((t - 0.1) * 11.0))
-
         telemetry_sample = {
             "timestamp": time.time(),
             "kind": "telemetry",
@@ -111,17 +105,6 @@ def demo_reader(data_queue: queue.Queue, stop_event: threading.Event) -> None:
             "bgy": bgy,
             "bgz": bgz,
             "align_complete": align_complete,
-        })
-
-        data_queue.put({
-            "timestamp": time.time(),
-            "kind": "vertical",
-            "vert_zd_est": vert_zd_est,
-            "vert_alt": -vert_zd_est,
-            "vert_vzd": vert_vzd,
-            "vert_ad_raw": vert_ad_raw,
-            "vert_ad_lpf": vert_ad_lpf,
-            "vert_zd_baro": vert_zd_baro,
         })
 
         time.sleep(0.1)

@@ -121,35 +121,38 @@ const SIGNAL_GROUPS = [
   },
   {
     title: 'INS Acceleration',
-    subtitle: 'Propagation a_n in N/E',
+    subtitle: 'Propagation a_n in N/E/D',
     chart: 'prop-accel',
     panelId: 'panel-prop-accel',
     tileId: 'tile-prop-accel',
     signals: [
       { key: 'prop_an', label: 'aN', color: '--c-prop-an', decimals: 4 },
       { key: 'prop_ae', label: 'aE', color: '--c-prop-ae', decimals: 4 },
+      { key: 'prop_ad', label: 'aD', color: '--c-prop-ad', decimals: 4 },
     ],
   },
   {
     title: 'INS Velocity',
-    subtitle: 'Propagation v_n in N/E',
+    subtitle: 'Propagation v_n in N/E/D',
     chart: 'prop-vel',
     panelId: 'panel-prop-vel',
     tileId: 'tile-prop-vel',
     signals: [
       { key: 'prop_vn', label: 'vN', color: '--c-prop-vn', decimals: 4 },
       { key: 'prop_ve', label: 'vE', color: '--c-prop-ve', decimals: 4 },
+      { key: 'prop_vd', label: 'vD', color: '--c-prop-vd', decimals: 4 },
     ],
   },
   {
     title: 'INS Position',
-    subtitle: 'Propagation p_n in N/E',
+    subtitle: 'Propagation p_n in N/E/D',
     chart: 'prop-pos',
     panelId: 'panel-prop-pos',
     tileId: 'tile-prop-pos',
     signals: [
       { key: 'prop_pn', label: 'pN', color: '--c-prop-pn', decimals: 4 },
       { key: 'prop_pe', label: 'pE', color: '--c-prop-pe', decimals: 4 },
+      { key: 'prop_pd', label: 'pD', color: '--c-prop-pd', decimals: 4 },
     ],
   },
   {
@@ -191,23 +194,41 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'Vertical Position',
-    subtitle: 'NED down estimate vs barometer',
-    chart: 'vert-pos',
-    panelId: 'panel-vert-pos',
+    title: 'INS Accel Bias',
+    subtitle: 'Body-frame accel bias',
+    chart: 'ins-bias',
+    panelId: 'panel-ins-bias',
+    tileId: 'tile-ins-bias',
     signals: [
-      { key: 'vert_zd_est', label: 'zD_est', color: '--c-prop-pn', decimals: 4 },
-      { key: 'vert_zd_baro', label: 'zD_baro', color: '--c-ned-d', decimals: 4 },
+      { key: 'ins_bax', label: 'bAx', color: '--c-ins-bax', decimals: 4 },
+      { key: 'ins_bay', label: 'bAy', color: '--c-ins-bay', decimals: 4 },
+      { key: 'ins_baz', label: 'bAz', color: '--c-ins-baz', decimals: 4 },
     ],
   },
   {
-    title: 'Vertical Acceleration',
-    subtitle: 'Raw vs LPF a_d',
-    chart: 'vert-accel',
-    panelId: 'panel-vert-accel',
+    title: 'Altitude',
+    subtitle: 'Altitude view from NED down states',
+    chart: 'altitude',
+    panelId: 'panel-altitude',
     signals: [
-      { key: 'vert_ad_raw', label: 'aRaw', color: '--c-ins-fbz', decimals: 4 },
-      { key: 'vert_ad_lpf', label: 'aLPF', color: '--c-ins-ad', decimals: 4 },
+      {
+        key: 'alt_gps',
+        label: 'GPS Alt',
+        color: '--c-alt-gps',
+        decimals: 4,
+        tension: 0,
+        stepped: 'middle',
+        borderDash: [8, 5],
+        borderWidth: 2.2,
+      },
+      {
+        key: 'alt_ins',
+        label: 'INS Alt',
+        color: '--c-alt-ins',
+        decimals: 4,
+        tension: 0.14,
+        borderWidth: 2.8,
+      },
     ],
   },
   {
@@ -219,8 +240,10 @@ const SIGNAL_GROUPS = [
     signals: [
       { key: 'ins_sig_pn', label: 'sigPn', color: '--c-ins-sig-pn', decimals: 4 },
       { key: 'ins_sig_pe', label: 'sigPe', color: '--c-ins-sig-pe', decimals: 4 },
+      { key: 'ins_sig_pd', label: 'sigPd', color: '--c-ins-sig-pd', decimals: 4 },
       { key: 'ins_sig_vn', label: 'sigVn', color: '--c-ins-sig-vn', decimals: 4 },
       { key: 'ins_sig_ve', label: 'sigVe', color: '--c-ins-sig-ve', decimals: 4 },
+      { key: 'ins_sig_vd', label: 'sigVd', color: '--c-ins-sig-vd', decimals: 4 },
     ],
   },
   {
@@ -231,8 +254,10 @@ const SIGNAL_GROUPS = [
     signals: [
       { key: 'corr_z_pn', label: 'zPn', color: '--c-corr-z-pn', decimals: 4 },
       { key: 'corr_z_pe', label: 'zPe', color: '--c-corr-z-pe', decimals: 4 },
+      { key: 'corr_z_pd', label: 'zPd', color: '--c-corr-z-pd', decimals: 4 },
       { key: 'corr_z_vn', label: 'zVn', color: '--c-corr-z-vn', decimals: 4 },
       { key: 'corr_z_ve', label: 'zVe', color: '--c-corr-z-ve', decimals: 4 },
+      { key: 'corr_z_vd', label: 'zVd', color: '--c-corr-z-vd', decimals: 4 },
     ],
   },
   {
@@ -244,8 +269,10 @@ const SIGNAL_GROUPS = [
     signals: [
       { key: 'corr_y_pn', label: 'yPn', color: '--c-corr-y-pn', decimals: 4 },
       { key: 'corr_y_pe', label: 'yPe', color: '--c-corr-y-pe', decimals: 4 },
+      { key: 'corr_y_pd', label: 'yPd', color: '--c-corr-y-pd', decimals: 4 },
       { key: 'corr_y_vn', label: 'yVn', color: '--c-corr-y-vn', decimals: 4 },
       { key: 'corr_y_ve', label: 'yVe', color: '--c-corr-y-ve', decimals: 4 },
+      { key: 'corr_y_vd', label: 'yVd', color: '--c-corr-y-vd', decimals: 4 },
     ],
   },
   {
@@ -257,8 +284,10 @@ const SIGNAL_GROUPS = [
     signals: [
       { key: 'corr_dx_pn', label: 'dxPn', color: '--c-corr-dx-pn', decimals: 4 },
       { key: 'corr_dx_pe', label: 'dxPe', color: '--c-corr-dx-pe', decimals: 4 },
+      { key: 'corr_dx_pd', label: 'dxPd', color: '--c-corr-dx-pd', decimals: 4 },
       { key: 'corr_dx_vn', label: 'dxVn', color: '--c-corr-dx-vn', decimals: 4 },
       { key: 'corr_dx_ve', label: 'dxVe', color: '--c-corr-dx-ve', decimals: 4 },
+      { key: 'corr_dx_vd', label: 'dxVd', color: '--c-corr-dx-vd', decimals: 4 },
     ],
   },
   {
@@ -269,8 +298,10 @@ const SIGNAL_GROUPS = [
     signals: [
       { key: 'corr_x_pn', label: 'xPn', color: '--c-corr-x-pn', decimals: 4 },
       { key: 'corr_x_pe', label: 'xPe', color: '--c-corr-x-pe', decimals: 4 },
+      { key: 'corr_x_pd', label: 'xPd', color: '--c-corr-x-pd', decimals: 4 },
       { key: 'corr_x_vn', label: 'xVn', color: '--c-corr-x-vn', decimals: 4 },
       { key: 'corr_x_ve', label: 'xVe', color: '--c-corr-x-ve', decimals: 4 },
+      { key: 'corr_x_vd', label: 'xVd', color: '--c-corr-x-vd', decimals: 4 },
     ],
   },
 ];
@@ -283,6 +314,11 @@ for (const group of SIGNAL_GROUPS) {
     signalIndex.set(signal.key, signal);
   }
 }
+
+const DERIVED_SIGNAL_SOURCES = {
+  alt_gps: ['ned_d'],
+  alt_ins: ['ins_pd', 'corr_x_pd', 'prop_pd'],
+};
 
 const state = {
   firstTimestamp: null,
@@ -321,6 +357,7 @@ const dom = {
   infoPropRate: document.getElementById('info-prop-rate'),
   infoInsFb: document.getElementById('info-ins-fb'),
   infoInsAn: document.getElementById('info-ins-an'),
+  infoInsBias: document.getElementById('info-ins-bias'),
   infoInsSigma: document.getElementById('info-ins-sigma'),
   infoCorrY: document.getElementById('info-corr-y'),
   infoCorrDx: document.getElementById('info-corr-dx'),
@@ -337,8 +374,8 @@ const dom = {
   summaryPropRate: document.getElementById('summary-prop-rate'),
   summaryInsFb: document.getElementById('summary-ins-fb'),
   summaryInsAn: document.getElementById('summary-ins-an'),
-  summaryVertPos: document.getElementById('summary-vert-pos'),
-  summaryVertAccel: document.getElementById('summary-vert-accel'),
+  summaryInsBias: document.getElementById('summary-ins-bias'),
+  summaryAltitude: document.getElementById('summary-altitude'),
   summaryInsSigma: document.getElementById('summary-ins-sigma'),
   summaryCorrZ: document.getElementById('summary-corr-z'),
   summaryCorrY: document.getElementById('summary-corr-y'),
@@ -435,6 +472,12 @@ for (const group of SIGNAL_GROUPS) {
       data: [],
       borderColor: css(signal.color),
       backgroundColor: css(signal.color),
+      borderDash: signal.borderDash ?? [],
+      borderWidth: signal.borderWidth ?? 2,
+      stepped: signal.stepped ?? false,
+      tension: signal.tension ?? 0.18,
+      pointRadius: signal.pointRadius ?? 0,
+      pointHoverRadius: signal.pointHoverRadius ?? 3,
       hidden: false,
     })),
   );
@@ -621,6 +664,33 @@ function mergeSample(sample) {
     }
     state.latestSample[key] = value;
   }
+
+  if (Number.isFinite(state.latestSample.ned_d)) {
+    state.latestSample.alt_gps = -state.latestSample.ned_d;
+  }
+
+  if (Number.isFinite(state.latestSample.ins_pd)) {
+    state.latestSample.alt_ins = -state.latestSample.ins_pd;
+  } else if (Number.isFinite(state.latestSample.corr_x_pd)) {
+    state.latestSample.alt_ins = -state.latestSample.corr_x_pd;
+  } else if (Number.isFinite(state.latestSample.prop_pd)) {
+    state.latestSample.alt_ins = -state.latestSample.prop_pd;
+  }
+}
+
+function derivedSignalValue(sample, key) {
+  const sourceKeys = DERIVED_SIGNAL_SOURCES[key];
+  if (!sourceKeys) {
+    return Number.NaN;
+  }
+
+  for (const sourceKey of sourceKeys) {
+    if (Number.isFinite(sample[sourceKey])) {
+      return state.latestSample[key];
+    }
+  }
+
+  return Number.NaN;
 }
 
 function updateSummary(sample, timeValue) {
@@ -642,15 +712,16 @@ function updateSummary(sample, timeValue) {
   dom.infoRef.textContent = sample.ref_valid === 1
     ? `${formatNumber(sample.ref_lat, 7)}, ${formatNumber(sample.ref_lon, 7)}, h ${formatNumber(sample.ref_h, 3)}`
     : '-';
-  dom.infoPropAccel.textContent = `(${formatNumber(sample.prop_an, 4)}, ${formatNumber(sample.prop_ae, 4)})`;
-  dom.infoPropVel.textContent = `(${formatNumber(sample.prop_vn, 4)}, ${formatNumber(sample.prop_ve, 4)})`;
-  dom.infoPropPos.textContent = `(${formatNumber(sample.prop_pn, 4)}, ${formatNumber(sample.prop_pe, 4)})`;
+  dom.infoPropAccel.textContent = `(${formatNumber(sample.prop_an, 4)}, ${formatNumber(sample.prop_ae, 4)}, ${formatNumber(sample.prop_ad, 4)})`;
+  dom.infoPropVel.textContent = `(${formatNumber(sample.prop_vn, 4)}, ${formatNumber(sample.prop_ve, 4)}, ${formatNumber(sample.prop_vd, 4)})`;
+  dom.infoPropPos.textContent = `(${formatNumber(sample.prop_pn, 4)}, ${formatNumber(sample.prop_pe, 4)}, ${formatNumber(sample.prop_pd, 4)})`;
   dom.infoPropRate.textContent = `dt ${formatNumber(sample.prop_dt, 4)}  Hz ${formatNumber(sample.prop_rate_hz, 3)}  avg ${formatNumber(sample.prop_avg_dt, 4)}`;
   dom.infoInsFb.textContent = `(${formatNumber(sample.ins_fb_x, 4)}, ${formatNumber(sample.ins_fb_y, 4)}, ${formatNumber(sample.ins_fb_z, 4)})`;
   dom.infoInsAn.textContent = `(${formatNumber(sample.ins_an, 4)}, ${formatNumber(sample.ins_ae, 4)}, ${formatNumber(sample.ins_ad, 4)})`;
-  dom.infoInsSigma.textContent = `(${formatNumber(sample.ins_sig_pn, 3)}, ${formatNumber(sample.ins_sig_pe, 3)}, ${formatNumber(sample.ins_sig_vn, 3)}, ${formatNumber(sample.ins_sig_ve, 3)})`;
-  dom.infoCorrY.textContent = `(${formatNumber(sample.corr_y_pn, 4)}, ${formatNumber(sample.corr_y_pe, 4)}, ${formatNumber(sample.corr_y_vn, 4)}, ${formatNumber(sample.corr_y_ve, 4)})`;
-  dom.infoCorrDx.textContent = `(${formatNumber(sample.corr_dx_pn, 4)}, ${formatNumber(sample.corr_dx_pe, 4)}, ${formatNumber(sample.corr_dx_vn, 4)}, ${formatNumber(sample.corr_dx_ve, 4)})`;
+  dom.infoInsBias.textContent = `(${formatNumber(sample.ins_bax, 4)}, ${formatNumber(sample.ins_bay, 4)}, ${formatNumber(sample.ins_baz, 4)})`;
+  dom.infoInsSigma.textContent = `(${formatNumber(sample.ins_sig_pn, 3)}, ${formatNumber(sample.ins_sig_pe, 3)}, ${formatNumber(sample.ins_sig_pd, 3)}, ${formatNumber(sample.ins_sig_vn, 3)}, ${formatNumber(sample.ins_sig_ve, 3)}, ${formatNumber(sample.ins_sig_vd, 3)})`;
+  dom.infoCorrY.textContent = `(${formatNumber(sample.corr_y_pn, 4)}, ${formatNumber(sample.corr_y_pe, 4)}, ${formatNumber(sample.corr_y_pd, 4)}, ${formatNumber(sample.corr_y_vn, 4)}, ${formatNumber(sample.corr_y_ve, 4)}, ${formatNumber(sample.corr_y_vd, 4)})`;
+  dom.infoCorrDx.textContent = `(${formatNumber(sample.corr_dx_pn, 4)}, ${formatNumber(sample.corr_dx_pe, 4)}, ${formatNumber(sample.corr_dx_pd, 4)}, ${formatNumber(sample.corr_dx_vn, 4)}, ${formatNumber(sample.corr_dx_ve, 4)}, ${formatNumber(sample.corr_dx_vd, 4)})`;
   dom.sampleClock.textContent = `t = ${formatNumber(timeValue, 2)} s`;
   dom.summaryQuat.textContent = `qw ${formatNumber(sample.qw, 4)}  qx ${formatNumber(sample.qx, 4)}  qy ${formatNumber(sample.qy, 4)}  qz ${formatNumber(sample.qz, 4)}`;
   dom.summaryGyro.textContent = `gx ${formatNumber(sample.gx, 4)}  gy ${formatNumber(sample.gy, 4)}  gz ${formatNumber(sample.gz, 4)}`;
@@ -659,19 +730,19 @@ function updateSummary(sample, timeValue) {
   dom.summaryVcov.textContent = `vcn ${formatNumber(sample.vcn, 4)}  vce ${formatNumber(sample.vce, 4)}  vcd ${formatNumber(sample.vcd, 4)}`;
   dom.summaryNed.textContent = `N ${formatNumber(sample.ned_n, 3)}  E ${formatNumber(sample.ned_e, 3)}  D ${formatNumber(sample.ned_d, 3)}`;
   dom.summaryAlign.textContent = `bgx ${formatNumber(sample.bgx, 6)}  bgy ${formatNumber(sample.bgy, 6)}  bgz ${formatNumber(sample.bgz, 6)}`;
-  dom.summaryPropAccel.textContent = `aN ${formatNumber(sample.prop_an, 4)}  aE ${formatNumber(sample.prop_ae, 4)}`;
-  dom.summaryPropVel.textContent = `vN ${formatNumber(sample.prop_vn, 4)}  vE ${formatNumber(sample.prop_ve, 4)}`;
-  dom.summaryPropPos.textContent = `pN ${formatNumber(sample.prop_pn, 4)}  pE ${formatNumber(sample.prop_pe, 4)}`;
+  dom.summaryPropAccel.textContent = `aN ${formatNumber(sample.prop_an, 4)}  aE ${formatNumber(sample.prop_ae, 4)}  aD ${formatNumber(sample.prop_ad, 4)}`;
+  dom.summaryPropVel.textContent = `vN ${formatNumber(sample.prop_vn, 4)}  vE ${formatNumber(sample.prop_ve, 4)}  vD ${formatNumber(sample.prop_vd, 4)}`;
+  dom.summaryPropPos.textContent = `pN ${formatNumber(sample.prop_pn, 4)}  pE ${formatNumber(sample.prop_pe, 4)}  pD ${formatNumber(sample.prop_pd, 4)}`;
   dom.summaryPropRate.textContent = `dt ${formatNumber(sample.prop_dt, 4)}  Hz ${formatNumber(sample.prop_rate_hz, 3)}  avg ${formatNumber(sample.prop_avg_dt, 4)}  min ${formatNumber(sample.prop_min_dt, 4)}  max ${formatNumber(sample.prop_max_dt, 4)}`;
   dom.summaryInsFb.textContent = `fbx ${formatNumber(sample.ins_fb_x, 4)}  fby ${formatNumber(sample.ins_fb_y, 4)}  fbz ${formatNumber(sample.ins_fb_z, 4)}`;
   dom.summaryInsAn.textContent = `aN ${formatNumber(sample.ins_an, 4)}  aE ${formatNumber(sample.ins_ae, 4)}  aD ${formatNumber(sample.ins_ad, 4)}`;
-  dom.summaryVertPos.textContent = `zD_est ${formatNumber(sample.vert_zd_est, 3)}  zD_baro ${formatNumber(sample.vert_zd_baro, 3)}  alt ${formatNumber(sample.vert_alt, 3)}  vzD ${formatNumber(sample.vert_vzd, 3)}`;
-  dom.summaryVertAccel.textContent = `aRaw ${formatNumber(sample.vert_ad_raw, 3)}  aLPF ${formatNumber(sample.vert_ad_lpf, 3)}`;
-  dom.summaryInsSigma.textContent = `sigPn ${formatNumber(sample.ins_sig_pn, 3)}  sigPe ${formatNumber(sample.ins_sig_pe, 3)}  sigVn ${formatNumber(sample.ins_sig_vn, 3)}  sigVe ${formatNumber(sample.ins_sig_ve, 3)}`;
-  dom.summaryCorrZ.textContent = `zPn ${formatNumber(sample.corr_z_pn, 3)}  zPe ${formatNumber(sample.corr_z_pe, 3)}  zVn ${formatNumber(sample.corr_z_vn, 3)}  zVe ${formatNumber(sample.corr_z_ve, 3)}`;
-  dom.summaryCorrY.textContent = `yPn ${formatNumber(sample.corr_y_pn, 3)}  yPe ${formatNumber(sample.corr_y_pe, 3)}  yVn ${formatNumber(sample.corr_y_vn, 3)}  yVe ${formatNumber(sample.corr_y_ve, 3)}`;
-  dom.summaryCorrDx.textContent = `dxPn ${formatNumber(sample.corr_dx_pn, 3)}  dxPe ${formatNumber(sample.corr_dx_pe, 3)}  dxVn ${formatNumber(sample.corr_dx_vn, 3)}  dxVe ${formatNumber(sample.corr_dx_ve, 3)}`;
-  dom.summaryCorrX.textContent = `xPn ${formatNumber(sample.corr_x_pn, 3)}  xPe ${formatNumber(sample.corr_x_pe, 3)}  xVn ${formatNumber(sample.corr_x_vn, 3)}  xVe ${formatNumber(sample.corr_x_ve, 3)}`;
+  dom.summaryInsBias.textContent = `bAx ${formatNumber(sample.ins_bax, 4)}  bAy ${formatNumber(sample.ins_bay, 4)}  bAz ${formatNumber(sample.ins_baz, 4)}`;
+  dom.summaryAltitude.textContent = `GPS Alt ${formatNumber(sample.alt_gps, 3)}  INS Alt ${formatNumber(sample.alt_ins, 3)}`;
+  dom.summaryInsSigma.textContent = `sigPn ${formatNumber(sample.ins_sig_pn, 3)}  sigPe ${formatNumber(sample.ins_sig_pe, 3)}  sigPd ${formatNumber(sample.ins_sig_pd, 3)}  sigVn ${formatNumber(sample.ins_sig_vn, 3)}  sigVe ${formatNumber(sample.ins_sig_ve, 3)}  sigVd ${formatNumber(sample.ins_sig_vd, 3)}`;
+  dom.summaryCorrZ.textContent = `zPn ${formatNumber(sample.corr_z_pn, 3)}  zPe ${formatNumber(sample.corr_z_pe, 3)}  zPd ${formatNumber(sample.corr_z_pd, 3)}  zVn ${formatNumber(sample.corr_z_vn, 3)}  zVe ${formatNumber(sample.corr_z_ve, 3)}  zVd ${formatNumber(sample.corr_z_vd, 3)}`;
+  dom.summaryCorrY.textContent = `yPn ${formatNumber(sample.corr_y_pn, 3)}  yPe ${formatNumber(sample.corr_y_pe, 3)}  yPd ${formatNumber(sample.corr_y_pd, 3)}  yVn ${formatNumber(sample.corr_y_vn, 3)}  yVe ${formatNumber(sample.corr_y_ve, 3)}  yVd ${formatNumber(sample.corr_y_vd, 3)}`;
+  dom.summaryCorrDx.textContent = `dxPn ${formatNumber(sample.corr_dx_pn, 3)}  dxPe ${formatNumber(sample.corr_dx_pe, 3)}  dxPd ${formatNumber(sample.corr_dx_pd, 3)}  dxVn ${formatNumber(sample.corr_dx_vn, 3)}  dxVe ${formatNumber(sample.corr_dx_ve, 3)}  dxVd ${formatNumber(sample.corr_dx_vd, 3)}`;
+  dom.summaryCorrX.textContent = `xPn ${formatNumber(sample.corr_x_pn, 3)}  xPe ${formatNumber(sample.corr_x_pe, 3)}  xPd ${formatNumber(sample.corr_x_pd, 3)}  xVn ${formatNumber(sample.corr_x_vn, 3)}  xVe ${formatNumber(sample.corr_x_ve, 3)}  xVd ${formatNumber(sample.corr_x_vd, 3)}`;
 
   for (const [key, signal] of signalIndex.entries()) {
     const valueNode = document.getElementById(`value-${key}`);
@@ -701,15 +772,17 @@ function pushSamples(samples) {
     state.latestTime = Math.max(state.latestTime, timeValue);
     state.sampleCount += 1;
 
+    mergeSample(sample);
+
     for (const [key] of signalIndex.entries()) {
       const dataset = datasetForKey(key);
-      if (!dataset || !Number.isFinite(sample[key])) {
+      const value = Number.isFinite(sample[key]) ? sample[key] : derivedSignalValue(sample, key);
+      if (!dataset || !Number.isFinite(value)) {
         continue;
       }
-      dataset.data.push({ x: timeValue, y: sample[key] });
+      dataset.data.push({ x: timeValue, y: value });
     }
 
-    mergeSample(sample);
     updateSummary(state.latestSample, timeValue);
   }
 

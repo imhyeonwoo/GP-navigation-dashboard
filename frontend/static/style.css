@@ -39,10 +39,13 @@
   --c-bgz: #a0b6ff;
   --c-prop-an: #4dd8ff;
   --c-prop-ae: #ff8f6b;
+  --c-prop-ad: #ffd166;
   --c-prop-vn: #86f7b8;
   --c-prop-ve: #ffd166;
+  --c-prop-vd: #c5a3ff;
   --c-prop-pn: #7dc8ff;
   --c-prop-pe: #ff7bbf;
+  --c-prop-pd: #35e0a1;
   --c-prop-dt: #4dd8ff;
   --c-prop-rate: #35e0a1;
   --c-prop-avg: #ffd166;
@@ -54,26 +57,41 @@
   --c-ins-an: #4dd8ff;
   --c-ins-ae: #ffd166;
   --c-ins-ad: #ff7bbf;
+  --c-ins-bax: #4dd8ff;
+  --c-ins-bay: #86f7b8;
+  --c-ins-baz: #ffd166;
   --c-ins-sig-pn: #4dd8ff;
   --c-ins-sig-pe: #86f7b8;
+  --c-ins-sig-pd: #ffd166;
   --c-ins-sig-vn: #ffb86b;
   --c-ins-sig-ve: #c5a3ff;
+  --c-ins-sig-vd: #ff7bbf;
   --c-corr-z-pn: #4dd8ff;
   --c-corr-z-pe: #86f7b8;
+  --c-corr-z-pd: #ffd166;
   --c-corr-z-vn: #ffd166;
   --c-corr-z-ve: #ff8f6b;
+  --c-corr-z-vd: #a0b6ff;
   --c-corr-y-pn: #ff8f6b;
   --c-corr-y-pe: #ff7bbf;
+  --c-corr-y-pd: #4dd8ff;
   --c-corr-y-vn: #ffd166;
   --c-corr-y-ve: #a0b6ff;
+  --c-corr-y-vd: #86f7b8;
   --c-corr-dx-pn: #4dd8ff;
   --c-corr-dx-pe: #86f7b8;
+  --c-corr-dx-pd: #ffd166;
   --c-corr-dx-vn: #ffd166;
   --c-corr-dx-ve: #ff8f6b;
+  --c-corr-dx-vd: #ff7bbf;
   --c-corr-x-pn: #7dc8ff;
   --c-corr-x-pe: #35e0a1;
+  --c-corr-x-pd: #ffd166;
   --c-corr-x-vn: #ffd166;
   --c-corr-x-ve: #ff7bbf;
+  --c-corr-x-vd: #a0b6ff;
+  --c-alt-gps: #35e0a1;
+  --c-alt-ins: #4dd8ff;
 }
 
 * { box-sizing: border-box; }

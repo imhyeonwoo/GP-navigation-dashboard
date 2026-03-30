@@ -109,15 +109,15 @@
             <span id="info-ref" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-accel" class="live-tile wide">
-            <span class="snapshot-label">INS Accel N/E</span>
+            <span class="snapshot-label">INS Accel N/E/D</span>
             <span id="info-prop-accel" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-vel" class="live-tile wide">
-            <span class="snapshot-label">INS Vel N/E</span>
+            <span class="snapshot-label">INS Vel N/E/D</span>
             <span id="info-prop-vel" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-pos" class="live-tile wide">
-            <span class="snapshot-label">INS Pos N/E</span>
+            <span class="snapshot-label">INS Pos N/E/D</span>
             <span id="info-prop-pos" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-rate" class="live-tile wide">
@@ -131,6 +131,10 @@
           <div id="tile-ins-an" class="live-tile wide">
             <span class="snapshot-label">INS Nav Accel</span>
             <span id="info-ins-an" class="snapshot-value mono">-</span>
+          </div>
+          <div id="tile-ins-bias" class="live-tile wide">
+            <span class="snapshot-label">INS Accel Bias</span>
+            <span id="info-ins-bias" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-ins-sigma" class="live-tile wide">
             <span class="snapshot-label">INS Sigma</span>
@@ -207,7 +211,7 @@
         <article id="panel-prop-accel" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>INS Acceleration</h2>
-            <span id="summary-prop-accel" class="plot-summary">aN -, aE -</span>
+            <span id="summary-prop-accel" class="plot-summary">aN -, aE -, aD -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-prop-accel"></canvas></div>
         </article>
@@ -215,7 +219,7 @@
         <article id="panel-prop-vel" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>INS Velocity</h2>
-            <span id="summary-prop-vel" class="plot-summary">vN -, vE -</span>
+            <span id="summary-prop-vel" class="plot-summary">vN -, vE -, vD -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-prop-vel"></canvas></div>
         </article>
@@ -223,7 +227,7 @@
         <article id="panel-prop-pos" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>INS Position</h2>
-            <span id="summary-prop-pos" class="plot-summary">pN -, pE -</span>
+            <span id="summary-prop-pos" class="plot-summary">pN -, pE -, pD -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-prop-pos"></canvas></div>
         </article>
@@ -252,26 +256,26 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-ins-an"></canvas></div>
         </article>
 
-        <article id="panel-vert-pos" class="panel plot-panel">
+        <article id="panel-ins-bias" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>Vertical Position</h2>
-            <span id="summary-vert-pos" class="plot-summary">zD_est -, zD_baro -, alt -, vzD -</span>
+            <h2>INS Accel Bias</h2>
+            <span id="summary-ins-bias" class="plot-summary">bAx -, bAy -, bAz -</span>
           </div>
-          <div class="chart-wrap matrix-chart"><canvas id="chart-vert-pos"></canvas></div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-ins-bias"></canvas></div>
         </article>
 
-        <article id="panel-vert-accel" class="panel plot-panel">
+        <article id="panel-altitude" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>Vertical Acceleration</h2>
-            <span id="summary-vert-accel" class="plot-summary">aRaw -, aLPF -</span>
+            <h2>Altitude</h2>
+            <span id="summary-altitude" class="plot-summary">GPS Alt -, INS Alt -</span>
           </div>
-          <div class="chart-wrap matrix-chart"><canvas id="chart-vert-accel"></canvas></div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-altitude"></canvas></div>
         </article>
 
         <article id="panel-ins-sigma" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>INS Sigma</h2>
-            <span id="summary-ins-sigma" class="plot-summary">sigPn -, sigPe -, sigVn -, sigVe -</span>
+            <span id="summary-ins-sigma" class="plot-summary">sigPn -, sigPe -, sigPd -, sigVn -, sigVe -, sigVd -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-ins-sigma"></canvas></div>
         </article>
@@ -279,7 +283,7 @@
         <article id="panel-corr-z" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>GPS Correction z</h2>
-            <span id="summary-corr-z" class="plot-summary">zPn -, zPe -, zVn -, zVe -</span>
+            <span id="summary-corr-z" class="plot-summary">zPn -, zPe -, zPd -, zVn -, zVe -, zVd -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-corr-z"></canvas></div>
         </article>
@@ -287,7 +291,7 @@
         <article id="panel-corr-y" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>GPS Innovation</h2>
-            <span id="summary-corr-y" class="plot-summary">yPn -, yPe -, yVn -, yVe -</span>
+            <span id="summary-corr-y" class="plot-summary">yPn -, yPe -, yPd -, yVn -, yVe -, yVd -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-corr-y"></canvas></div>
         </article>
@@ -295,7 +299,7 @@
         <article id="panel-corr-dx" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Correction Delta</h2>
-            <span id="summary-corr-dx" class="plot-summary">dxPn -, dxPe -, dxVn -, dxVe -</span>
+            <span id="summary-corr-dx" class="plot-summary">dxPn -, dxPe -, dxPd -, dxVn -, dxVe -, dxVd -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-corr-dx"></canvas></div>
         </article>
@@ -303,7 +307,7 @@
         <article id="panel-corr-x" class="panel plot-panel">
           <div class="panel-title-row">
             <h2>Corrected State</h2>
-            <span id="summary-corr-x" class="plot-summary">xPn -, xPe -, xVn -, xVe -</span>
+            <span id="summary-corr-x" class="plot-summary">xPn -, xPe -, xPd -, xVn -, xVe -, xVd -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-corr-x"></canvas></div>
         </article>

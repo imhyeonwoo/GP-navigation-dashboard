@@ -39,41 +39,31 @@ PROPAGATION_PATTERN = re.compile(
     r"avg=(?P<prop_avg_dt>-?\d+\.\d+)\s+"
     r"min=(?P<prop_min_dt>-?\d+\.\d+)\s+"
     r"max=(?P<prop_max_dt>-?\d+\.\d+)\s+)?"
-    r"a_ne=\[(?P<prop_an>-?\d+\.\d+),(?P<prop_ae>-?\d+\.\d+)\]"
-    r"(?:\s+v_ne=\[(?P<prop_vn>-?\d+\.\d+),(?P<prop_ve>-?\d+\.\d+)\]\s+"
-    r"p_ne=\[(?P<prop_pn>-?\d+\.\d+),(?P<prop_pe>-?\d+\.\d+)\])?"
+    r"a_ned=\[(?P<prop_an>-?\d+\.\d+),(?P<prop_ae>-?\d+\.\d+),(?P<prop_ad>-?\d+\.\d+)\]"
+    r"(?:\s+v_ned=\[(?P<prop_vn>-?\d+\.\d+),(?P<prop_ve>-?\d+\.\d+),(?P<prop_vd>-?\d+\.\d+)\]\s+"
+    r"p_ned=\[(?P<prop_pn>-?\d+\.\d+),(?P<prop_pe>-?\d+\.\d+),(?P<prop_pd>-?\d+\.\d+)\])?"
 )
 
 PROPAGATION_FIRST_PATTERN = re.compile(
     r"PROP\s+first\s+dt=(?P<prop_dt>-?\d+\.\d+)\s+"
-    r"a_ne=\[(?P<prop_an>-?\d+\.\d+),(?P<prop_ae>-?\d+\.\d+)\]"
+    r"a_ned=\[(?P<prop_an>-?\d+\.\d+),(?P<prop_ae>-?\d+\.\d+),(?P<prop_ad>-?\d+\.\d+)\]"
 )
 
 INS_CHECK_PATTERN = re.compile(
     r"INSCHK\s+fb_b=\[(?P<ins_fb_x>-?\d+\.\d+),(?P<ins_fb_y>-?\d+\.\d+),(?P<ins_fb_z>-?\d+\.\d+)\]\s+"
     r"a_n=\[(?P<ins_an>-?\d+\.\d+),(?P<ins_ae>-?\d+\.\d+),(?P<ins_ad>-?\d+\.\d+)\]\s+"
-    r"v_ne=\[(?P<ins_vn>-?\d+\.\d+),(?P<ins_ve>-?\d+\.\d+)\]\s+"
-    r"p_ne=\[(?P<ins_pn>-?\d+\.\d+),(?P<ins_pe>-?\d+\.\d+)\]\s+"
-    r"b_a=\[(?P<ins_bax>-?\d+\.\d+),(?P<ins_bay>-?\d+\.\d+)\]\s+"
-    r"Pdiag=\[(?P<ins_pdiag_pn>-?\d+\.\d+),(?P<ins_pdiag_pe>-?\d+\.\d+),(?P<ins_pdiag_vn>-?\d+\.\d+),(?P<ins_pdiag_ve>-?\d+\.\d+)\]"
+    r"v_ned=\[(?P<ins_vn>-?\d+\.\d+),(?P<ins_ve>-?\d+\.\d+),(?P<ins_vd>-?\d+\.\d+)\]\s+"
+    r"p_ned=\[(?P<ins_pn>-?\d+\.\d+),(?P<ins_pe>-?\d+\.\d+),(?P<ins_pd>-?\d+\.\d+)\]\s+"
+    r"b_a=\[(?P<ins_bax>-?\d+\.\d+),(?P<ins_bay>-?\d+\.\d+),(?P<ins_baz>-?\d+\.\d+)\]\s+"
+    r"Pdiag=\[(?P<ins_pdiag_pn>-?\d+\.\d+),(?P<ins_pdiag_pe>-?\d+\.\d+),(?P<ins_pdiag_pd>-?\d+\.\d+),(?P<ins_pdiag_vn>-?\d+\.\d+),(?P<ins_pdiag_ve>-?\d+\.\d+),(?P<ins_pdiag_vd>-?\d+\.\d+)\]"
 )
 
 GPS_CORRECTION_PATTERN = re.compile(
-    r"GPSCOR\s+z=\[(?P<corr_z_pn>-?\d+\.\d+),(?P<corr_z_pe>-?\d+\.\d+),(?P<corr_z_vn>-?\d+\.\d+),(?P<corr_z_ve>-?\d+\.\d+)\]\s+"
-    r"y=\[(?P<corr_y_pn>-?\d+\.\d+),(?P<corr_y_pe>-?\d+\.\d+),(?P<corr_y_vn>-?\d+\.\d+),(?P<corr_y_ve>-?\d+\.\d+)\]\s+"
-    r"dx=\[(?P<corr_dx_pn>-?\d+\.\d+),(?P<corr_dx_pe>-?\d+\.\d+),(?P<corr_dx_vn>-?\d+\.\d+),(?P<corr_dx_ve>-?\d+\.\d+)\]\s+"
-    r"x=\[(?P<corr_x_pn>-?\d+\.\d+),(?P<corr_x_pe>-?\d+\.\d+),(?P<corr_x_vn>-?\d+\.\d+),(?P<corr_x_ve>-?\d+\.\d+)\]"
+    r"GPSCOR\s+z=\[(?P<corr_z_pn>-?\d+\.\d+),(?P<corr_z_pe>-?\d+\.\d+),(?P<corr_z_pd>-?\d+\.\d+),(?P<corr_z_vn>-?\d+\.\d+),(?P<corr_z_ve>-?\d+\.\d+),(?P<corr_z_vd>-?\d+\.\d+)\]\s+"
+    r"y=\[(?P<corr_y_pn>-?\d+\.\d+),(?P<corr_y_pe>-?\d+\.\d+),(?P<corr_y_pd>-?\d+\.\d+),(?P<corr_y_vn>-?\d+\.\d+),(?P<corr_y_ve>-?\d+\.\d+),(?P<corr_y_vd>-?\d+\.\d+)\]\s+"
+    r"dx=\[(?P<corr_dx_pn>-?\d+\.\d+),(?P<corr_dx_pe>-?\d+\.\d+),(?P<corr_dx_pd>-?\d+\.\d+),(?P<corr_dx_vn>-?\d+\.\d+),(?P<corr_dx_ve>-?\d+\.\d+),(?P<corr_dx_vd>-?\d+\.\d+)\]\s+"
+    r"x=\[(?P<corr_x_pn>-?\d+\.\d+),(?P<corr_x_pe>-?\d+\.\d+),(?P<corr_x_pd>-?\d+\.\d+),(?P<corr_x_vn>-?\d+\.\d+),(?P<corr_x_ve>-?\d+\.\d+),(?P<corr_x_vd>-?\d+\.\d+)\]"
 )
-
-VERTICAL_PATTERN = re.compile(
-    r"VERT\s+z_d_est=(?P<vert_zd_est>-?\d+\.\d+)\s+"
-    r"alt=(?P<vert_alt>-?\d+\.\d+)\s+"
-    r"vz_d=(?P<vert_vzd>-?\d+\.\d+)\s+"
-    r"a_d_raw=(?P<vert_ad_raw>-?\d+\.\d+)\s+"
-    r"a_d_lpf=(?P<vert_ad_lpf>-?\d+\.\d+)\s+"
-    r"z_d_baro=(?P<vert_zd_baro>-?\d+\.\d+)"
-)
-
 
 def _with_timestamp(values: dict) -> dict:
     values["timestamp"] = time.time()
@@ -152,6 +142,7 @@ def parse_line(line: str) -> Optional[dict]:
             "prop_dt": float(match.group("prop_dt")),
             "prop_an": float(match.group("prop_an")),
             "prop_ae": float(match.group("prop_ae")),
+            "prop_ad": float(match.group("prop_ad")),
             "kind": "propagation",
         }
         return _with_timestamp(values)
@@ -161,8 +152,10 @@ def parse_line(line: str) -> Optional[dict]:
         values = {key: float(value) for key, value in match.groupdict().items()}
         values["ins_sig_pn"] = math.sqrt(max(values["ins_pdiag_pn"], 0.0))
         values["ins_sig_pe"] = math.sqrt(max(values["ins_pdiag_pe"], 0.0))
+        values["ins_sig_pd"] = math.sqrt(max(values["ins_pdiag_pd"], 0.0))
         values["ins_sig_vn"] = math.sqrt(max(values["ins_pdiag_vn"], 0.0))
         values["ins_sig_ve"] = math.sqrt(max(values["ins_pdiag_ve"], 0.0))
+        values["ins_sig_vd"] = math.sqrt(max(values["ins_pdiag_vd"], 0.0))
         values["kind"] = "ins_check"
         return _with_timestamp(values)
 
@@ -170,12 +163,6 @@ def parse_line(line: str) -> Optional[dict]:
     if match is not None:
         values = {key: float(value) for key, value in match.groupdict().items()}
         values["kind"] = "gps_correction"
-        return _with_timestamp(values)
-
-    match = VERTICAL_PATTERN.search(text)
-    if match is not None:
-        values = {key: float(value) for key, value in match.groupdict().items()}
-        values["kind"] = "vertical"
         return _with_timestamp(values)
 
     return None
