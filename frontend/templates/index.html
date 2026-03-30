@@ -109,35 +109,35 @@
             <span id="info-ref" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-accel" class="live-tile wide">
-            <span class="snapshot-label">INS Accel N/E/D</span>
+            <span class="snapshot-label">Propagation Accel N/E/D</span>
             <span id="info-prop-accel" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-vel" class="live-tile wide">
-            <span class="snapshot-label">INS Vel N/E/D</span>
+            <span class="snapshot-label">Propagation Vel N/E/D</span>
             <span id="info-prop-vel" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-pos" class="live-tile wide">
-            <span class="snapshot-label">INS Pos N/E/D</span>
+            <span class="snapshot-label">Propagation Pos N/E/D</span>
             <span id="info-prop-pos" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-prop-rate" class="live-tile wide">
-            <span class="snapshot-label">INS Rate</span>
+            <span class="snapshot-label">Propagation Rate</span>
             <span id="info-prop-rate" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-ins-fb" class="live-tile wide">
-            <span class="snapshot-label">INS Specific Force</span>
+            <span class="snapshot-label">IMU Specific Force</span>
             <span id="info-ins-fb" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-ins-an" class="live-tile wide">
-            <span class="snapshot-label">INS Nav Accel</span>
+            <span class="snapshot-label">Propagation Nav Accel</span>
             <span id="info-ins-an" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-ins-bias" class="live-tile wide">
-            <span class="snapshot-label">INS Accel Bias</span>
+            <span class="snapshot-label">EKF Accel Bias</span>
             <span id="info-ins-bias" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-ins-sigma" class="live-tile wide">
-            <span class="snapshot-label">INS Sigma</span>
+            <span class="snapshot-label">EKF Sigma</span>
             <span id="info-ins-sigma" class="snapshot-value mono">-</span>
           </div>
           <div id="tile-corr-y" class="live-tile wide">
@@ -210,7 +210,7 @@
 
         <article id="panel-prop-accel" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Acceleration</h2>
+            <h2>Propagation Acceleration</h2>
             <span id="summary-prop-accel" class="plot-summary">aN -, aE -, aD -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-prop-accel"></canvas></div>
@@ -218,7 +218,7 @@
 
         <article id="panel-prop-vel" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Velocity</h2>
+            <h2>Propagation Velocity</h2>
             <span id="summary-prop-vel" class="plot-summary">vN -, vE -, vD -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-prop-vel"></canvas></div>
@@ -226,7 +226,7 @@
 
         <article id="panel-prop-pos" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Position</h2>
+            <h2>Propagation Position</h2>
             <span id="summary-prop-pos" class="plot-summary">pN -, pE -, pD -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-prop-pos"></canvas></div>
@@ -234,7 +234,7 @@
 
         <article id="panel-prop-rate" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Rate</h2>
+            <h2>Propagation Rate</h2>
             <span id="summary-prop-rate" class="plot-summary">dt -, Hz -, avg -, min -, max -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-prop-rate"></canvas></div>
@@ -242,7 +242,7 @@
 
         <article id="panel-ins-fb" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Specific Force</h2>
+            <h2>IMU Specific Force</h2>
             <span id="summary-ins-fb" class="plot-summary">fbx -, fby -, fbz -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-ins-fb"></canvas></div>
@@ -250,7 +250,7 @@
 
         <article id="panel-ins-an" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Nav Accel</h2>
+            <h2>Propagation Nav Accel</h2>
             <span id="summary-ins-an" class="plot-summary">aN -, aE -, aD -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-ins-an"></canvas></div>
@@ -258,7 +258,7 @@
 
         <article id="panel-ins-bias" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Accel Bias</h2>
+            <h2>EKF Accel Bias</h2>
             <span id="summary-ins-bias" class="plot-summary">bAx -, bAy -, bAz -</span>
           </div>
           <div class="chart-wrap matrix-chart"><canvas id="chart-ins-bias"></canvas></div>
@@ -272,12 +272,20 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-altitude"></canvas></div>
         </article>
 
-        <article id="panel-ins-sigma" class="panel plot-panel">
+        <article id="panel-ekf-sigma-pos" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>INS Sigma</h2>
-            <span id="summary-ins-sigma" class="plot-summary">sigPn -, sigPe -, sigPd -, sigVn -, sigVe -, sigVd -</span>
+            <h2>EKF Position Sigma</h2>
+            <span id="summary-ekf-sigma-pos" class="plot-summary">sigPn -, sigPe -, sigPd -</span>
           </div>
-          <div class="chart-wrap matrix-chart"><canvas id="chart-ins-sigma"></canvas></div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-ekf-sigma-pos"></canvas></div>
+        </article>
+
+        <article id="panel-ekf-sigma-vel" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>EKF Velocity Sigma</h2>
+            <span id="summary-ekf-sigma-vel" class="plot-summary">sigVn -, sigVe -, sigVd -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-ekf-sigma-vel"></canvas></div>
         </article>
 
         <article id="panel-corr-z" class="panel plot-panel">
@@ -304,12 +312,20 @@
           <div class="chart-wrap matrix-chart"><canvas id="chart-corr-dx"></canvas></div>
         </article>
 
-        <article id="panel-corr-x" class="panel plot-panel">
+        <article id="panel-corr-x-pos" class="panel plot-panel">
           <div class="panel-title-row">
-            <h2>Corrected State</h2>
-            <span id="summary-corr-x" class="plot-summary">xPn -, xPe -, xPd -, xVn -, xVe -, xVd -</span>
+            <h2>Corrected Position</h2>
+            <span id="summary-corr-x-pos" class="plot-summary">xPn -, xPe -, xPd -</span>
           </div>
-          <div class="chart-wrap matrix-chart"><canvas id="chart-corr-x"></canvas></div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-corr-x-pos"></canvas></div>
+        </article>
+
+        <article id="panel-corr-x-vel" class="panel plot-panel">
+          <div class="panel-title-row">
+            <h2>Corrected Velocity</h2>
+            <span id="summary-corr-x-vel" class="plot-summary">xVn -, xVe -, xVd -</span>
+          </div>
+          <div class="chart-wrap matrix-chart"><canvas id="chart-corr-x-vel"></canvas></div>
         </article>
       </section>
     </section>

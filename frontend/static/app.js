@@ -120,8 +120,8 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Acceleration',
-    subtitle: 'Propagation a_n in N/E/D',
+    title: 'Propagation Acceleration',
+    subtitle: 'IMU propagation a_n in N/E/D',
     chart: 'prop-accel',
     panelId: 'panel-prop-accel',
     tileId: 'tile-prop-accel',
@@ -132,8 +132,8 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Velocity',
-    subtitle: 'Propagation v_n in N/E/D',
+    title: 'Propagation Velocity',
+    subtitle: 'IMU propagation v_n in N/E/D',
     chart: 'prop-vel',
     panelId: 'panel-prop-vel',
     tileId: 'tile-prop-vel',
@@ -144,8 +144,8 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Position',
-    subtitle: 'Propagation p_n in N/E/D',
+    title: 'Propagation Position',
+    subtitle: 'IMU propagation p_n in N/E/D',
     chart: 'prop-pos',
     panelId: 'panel-prop-pos',
     tileId: 'tile-prop-pos',
@@ -156,7 +156,7 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Rate',
+    title: 'Propagation Rate',
     subtitle: 'Propagation timing',
     chart: 'prop-rate',
     panelId: 'panel-prop-rate',
@@ -170,8 +170,8 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Specific Force',
-    subtitle: 'Body-frame f_b',
+    title: 'IMU Specific Force',
+    subtitle: 'Body-frame corrected specific force',
     chart: 'ins-fb',
     panelId: 'panel-ins-fb',
     tileId: 'tile-ins-fb',
@@ -182,8 +182,8 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Nav Accel',
-    subtitle: 'Navigation-frame a_n',
+    title: 'Propagation Nav Accel',
+    subtitle: 'Navigation-frame acceleration from IMU',
     chart: 'ins-an',
     panelId: 'panel-ins-an',
     tileId: 'tile-ins-an',
@@ -194,8 +194,8 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Accel Bias',
-    subtitle: 'Body-frame accel bias',
+    title: 'EKF Accel Bias',
+    subtitle: 'Estimated accel bias state',
     chart: 'ins-bias',
     panelId: 'panel-ins-bias',
     tileId: 'tile-ins-bias',
@@ -232,15 +232,23 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'INS Covariance Sigma',
-    subtitle: '1-sigma from P diag',
-    chart: 'ins-sigma',
-    panelId: 'panel-ins-sigma',
+    title: 'EKF Position Sigma',
+    subtitle: '1-sigma from EKF position covariance',
+    chart: 'ekf-sigma-pos',
+    panelId: 'panel-ekf-sigma-pos',
     tileId: 'tile-ins-sigma',
     signals: [
       { key: 'ins_sig_pn', label: 'sigPn', color: '--c-ins-sig-pn', decimals: 4 },
       { key: 'ins_sig_pe', label: 'sigPe', color: '--c-ins-sig-pe', decimals: 4 },
       { key: 'ins_sig_pd', label: 'sigPd', color: '--c-ins-sig-pd', decimals: 4 },
+    ],
+  },
+  {
+    title: 'EKF Velocity Sigma',
+    subtitle: '1-sigma from EKF velocity covariance',
+    chart: 'ekf-sigma-vel',
+    panelId: 'panel-ekf-sigma-vel',
+    signals: [
       { key: 'ins_sig_vn', label: 'sigVn', color: '--c-ins-sig-vn', decimals: 4 },
       { key: 'ins_sig_ve', label: 'sigVe', color: '--c-ins-sig-ve', decimals: 4 },
       { key: 'ins_sig_vd', label: 'sigVd', color: '--c-ins-sig-vd', decimals: 4 },
@@ -291,14 +299,22 @@ const SIGNAL_GROUPS = [
     ],
   },
   {
-    title: 'Corrected State',
-    subtitle: 'State after GNSS update',
-    chart: 'corr-x',
-    panelId: 'panel-corr-x',
+    title: 'Corrected Position',
+    subtitle: 'Position state after GNSS update',
+    chart: 'corr-x-pos',
+    panelId: 'panel-corr-x-pos',
     signals: [
       { key: 'corr_x_pn', label: 'xPn', color: '--c-corr-x-pn', decimals: 4 },
       { key: 'corr_x_pe', label: 'xPe', color: '--c-corr-x-pe', decimals: 4 },
       { key: 'corr_x_pd', label: 'xPd', color: '--c-corr-x-pd', decimals: 4 },
+    ],
+  },
+  {
+    title: 'Corrected Velocity',
+    subtitle: 'Velocity state after GNSS update',
+    chart: 'corr-x-vel',
+    panelId: 'panel-corr-x-vel',
+    signals: [
       { key: 'corr_x_vn', label: 'xVn', color: '--c-corr-x-vn', decimals: 4 },
       { key: 'corr_x_ve', label: 'xVe', color: '--c-corr-x-ve', decimals: 4 },
       { key: 'corr_x_vd', label: 'xVd', color: '--c-corr-x-vd', decimals: 4 },
@@ -376,11 +392,13 @@ const dom = {
   summaryInsAn: document.getElementById('summary-ins-an'),
   summaryInsBias: document.getElementById('summary-ins-bias'),
   summaryAltitude: document.getElementById('summary-altitude'),
-  summaryInsSigma: document.getElementById('summary-ins-sigma'),
+  summaryEkfSigmaPos: document.getElementById('summary-ekf-sigma-pos'),
+  summaryEkfSigmaVel: document.getElementById('summary-ekf-sigma-vel'),
   summaryCorrZ: document.getElementById('summary-corr-z'),
   summaryCorrY: document.getElementById('summary-corr-y'),
   summaryCorrDx: document.getElementById('summary-corr-dx'),
-  summaryCorrX: document.getElementById('summary-corr-x'),
+  summaryCorrXPos: document.getElementById('summary-corr-x-pos'),
+  summaryCorrXVel: document.getElementById('summary-corr-x-vel'),
 };
 
 function css(name) {
@@ -719,7 +737,7 @@ function updateSummary(sample, timeValue) {
   dom.infoInsFb.textContent = `(${formatNumber(sample.ins_fb_x, 4)}, ${formatNumber(sample.ins_fb_y, 4)}, ${formatNumber(sample.ins_fb_z, 4)})`;
   dom.infoInsAn.textContent = `(${formatNumber(sample.ins_an, 4)}, ${formatNumber(sample.ins_ae, 4)}, ${formatNumber(sample.ins_ad, 4)})`;
   dom.infoInsBias.textContent = `(${formatNumber(sample.ins_bax, 4)}, ${formatNumber(sample.ins_bay, 4)}, ${formatNumber(sample.ins_baz, 4)})`;
-  dom.infoInsSigma.textContent = `(${formatNumber(sample.ins_sig_pn, 3)}, ${formatNumber(sample.ins_sig_pe, 3)}, ${formatNumber(sample.ins_sig_pd, 3)}, ${formatNumber(sample.ins_sig_vn, 3)}, ${formatNumber(sample.ins_sig_ve, 3)}, ${formatNumber(sample.ins_sig_vd, 3)})`;
+  dom.infoInsSigma.textContent = `P(${formatNumber(sample.ins_sig_pn, 3)}, ${formatNumber(sample.ins_sig_pe, 3)}, ${formatNumber(sample.ins_sig_pd, 3)})  V(${formatNumber(sample.ins_sig_vn, 3)}, ${formatNumber(sample.ins_sig_ve, 3)}, ${formatNumber(sample.ins_sig_vd, 3)})`;
   dom.infoCorrY.textContent = `(${formatNumber(sample.corr_y_pn, 4)}, ${formatNumber(sample.corr_y_pe, 4)}, ${formatNumber(sample.corr_y_pd, 4)}, ${formatNumber(sample.corr_y_vn, 4)}, ${formatNumber(sample.corr_y_ve, 4)}, ${formatNumber(sample.corr_y_vd, 4)})`;
   dom.infoCorrDx.textContent = `(${formatNumber(sample.corr_dx_pn, 4)}, ${formatNumber(sample.corr_dx_pe, 4)}, ${formatNumber(sample.corr_dx_pd, 4)}, ${formatNumber(sample.corr_dx_vn, 4)}, ${formatNumber(sample.corr_dx_ve, 4)}, ${formatNumber(sample.corr_dx_vd, 4)})`;
   dom.sampleClock.textContent = `t = ${formatNumber(timeValue, 2)} s`;
@@ -738,11 +756,13 @@ function updateSummary(sample, timeValue) {
   dom.summaryInsAn.textContent = `aN ${formatNumber(sample.ins_an, 4)}  aE ${formatNumber(sample.ins_ae, 4)}  aD ${formatNumber(sample.ins_ad, 4)}`;
   dom.summaryInsBias.textContent = `bAx ${formatNumber(sample.ins_bax, 4)}  bAy ${formatNumber(sample.ins_bay, 4)}  bAz ${formatNumber(sample.ins_baz, 4)}`;
   dom.summaryAltitude.textContent = `GPS Alt ${formatNumber(sample.alt_gps, 3)}  INS Alt ${formatNumber(sample.alt_ins, 3)}`;
-  dom.summaryInsSigma.textContent = `sigPn ${formatNumber(sample.ins_sig_pn, 3)}  sigPe ${formatNumber(sample.ins_sig_pe, 3)}  sigPd ${formatNumber(sample.ins_sig_pd, 3)}  sigVn ${formatNumber(sample.ins_sig_vn, 3)}  sigVe ${formatNumber(sample.ins_sig_ve, 3)}  sigVd ${formatNumber(sample.ins_sig_vd, 3)}`;
+  dom.summaryEkfSigmaPos.textContent = `sigPn ${formatNumber(sample.ins_sig_pn, 3)}  sigPe ${formatNumber(sample.ins_sig_pe, 3)}  sigPd ${formatNumber(sample.ins_sig_pd, 3)}`;
+  dom.summaryEkfSigmaVel.textContent = `sigVn ${formatNumber(sample.ins_sig_vn, 3)}  sigVe ${formatNumber(sample.ins_sig_ve, 3)}  sigVd ${formatNumber(sample.ins_sig_vd, 3)}`;
   dom.summaryCorrZ.textContent = `zPn ${formatNumber(sample.corr_z_pn, 3)}  zPe ${formatNumber(sample.corr_z_pe, 3)}  zPd ${formatNumber(sample.corr_z_pd, 3)}  zVn ${formatNumber(sample.corr_z_vn, 3)}  zVe ${formatNumber(sample.corr_z_ve, 3)}  zVd ${formatNumber(sample.corr_z_vd, 3)}`;
   dom.summaryCorrY.textContent = `yPn ${formatNumber(sample.corr_y_pn, 3)}  yPe ${formatNumber(sample.corr_y_pe, 3)}  yPd ${formatNumber(sample.corr_y_pd, 3)}  yVn ${formatNumber(sample.corr_y_vn, 3)}  yVe ${formatNumber(sample.corr_y_ve, 3)}  yVd ${formatNumber(sample.corr_y_vd, 3)}`;
   dom.summaryCorrDx.textContent = `dxPn ${formatNumber(sample.corr_dx_pn, 3)}  dxPe ${formatNumber(sample.corr_dx_pe, 3)}  dxPd ${formatNumber(sample.corr_dx_pd, 3)}  dxVn ${formatNumber(sample.corr_dx_vn, 3)}  dxVe ${formatNumber(sample.corr_dx_ve, 3)}  dxVd ${formatNumber(sample.corr_dx_vd, 3)}`;
-  dom.summaryCorrX.textContent = `xPn ${formatNumber(sample.corr_x_pn, 3)}  xPe ${formatNumber(sample.corr_x_pe, 3)}  xPd ${formatNumber(sample.corr_x_pd, 3)}  xVn ${formatNumber(sample.corr_x_vn, 3)}  xVe ${formatNumber(sample.corr_x_ve, 3)}  xVd ${formatNumber(sample.corr_x_vd, 3)}`;
+  dom.summaryCorrXPos.textContent = `xPn ${formatNumber(sample.corr_x_pn, 3)}  xPe ${formatNumber(sample.corr_x_pe, 3)}  xPd ${formatNumber(sample.corr_x_pd, 3)}`;
+  dom.summaryCorrXVel.textContent = `xVn ${formatNumber(sample.corr_x_vn, 3)}  xVe ${formatNumber(sample.corr_x_ve, 3)}  xVd ${formatNumber(sample.corr_x_vd, 3)}`;
 
   for (const [key, signal] of signalIndex.entries()) {
     const valueNode = document.getElementById(`value-${key}`);
