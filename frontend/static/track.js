@@ -7,7 +7,25 @@ const state = {
   latestTime: 0,
   gpsRefLat: null,
   gpsRefLon: null,
+  latestGpsPoint: null,
+  latestInsPoint: null,
 };
+
+function latestLocalInsPoint(sample) {
+  if (Number.isFinite(sample.prop_pe) && Number.isFinite(sample.prop_pn)) {
+    return { x: sample.prop_pe, y: sample.prop_pn };
+  }
+
+  if (Number.isFinite(sample.ins_pe) && Number.isFinite(sample.ins_pn)) {
+    return { x: sample.ins_pe, y: sample.ins_pn };
+  }
+
+  if (Number.isFinite(sample.corr_x_pe) && Number.isFinite(sample.corr_x_pn)) {
+    return { x: sample.corr_x_pe, y: sample.corr_x_pn };
+  }
+
+  return null;
+}
 
 const dom = {
   pageTitle: document.getElementById('page-title'),
@@ -67,6 +85,18 @@ function projectGpsToMeters(lat, lon) {
   };
 }
 
+function localGpsPointFromSample(sample) {
+  if (Number.isFinite(sample.ned_e) && Number.isFinite(sample.ned_n)) {
+    return { x: sample.ned_e, y: sample.ned_n };
+  }
+
+  if (Number.isFinite(sample.lat) && Number.isFinite(sample.lon)) {
+    return projectGpsToMeters(sample.lat, sample.lon);
+  }
+
+  return null;
+}
+
 function makeChart() {
   const context = document.getElementById('track-chart').getContext('2d');
 
@@ -86,7 +116,7 @@ function makeChart() {
             tension: 0.12,
           },
           {
-            label: 'EKF Corrected INS',
+            label: 'INS Live Track',
             data: [],
             showLine: true,
             borderColor: css('--c-prop-pn') || '#7dc8ff',
@@ -105,7 +135,7 @@ function makeChart() {
             pointHoverRadius: 5,
           },
           {
-            label: 'INS Current',
+            label: 'INS Live',
             data: [],
             showLine: false,
             borderColor: css('--c-prop-pn') || '#7dc8ff',
@@ -207,8 +237,8 @@ const chart = makeChart();
 function configurePage() {
   if (mode === 'local') {
     dom.pageTitle.textContent = 'Local N/E Track';
-    dom.heroSubtitle.textContent = 'GPS Measurement vs EKF Corrected INS';
-    dom.heroSummary.textContent = 'GPS N/E measurements and EKF-updated INS position overlaid in local North-East coordinates';
+    dom.heroSubtitle.textContent = 'GPS Measurement vs INS Live Position';
+    dom.heroSummary.textContent = 'GPS N/E measurements and live INS position overlaid in local North-East coordinates';
   } else {
     dom.pageTitle.textContent = 'GPS Track';
     dom.heroSubtitle.textContent = 'Projected GPS Trajectory';
@@ -223,24 +253,27 @@ function mergeSample(sample) {
     }
     state.latestSample[key] = value;
   }
+
+  if (sample?.ref_valid === 1 && Number.isFinite(sample.ref_lat) && Number.isFinite(sample.ref_lon)) {
+    state.gpsRefLat = sample.ref_lat;
+    state.gpsRefLon = sample.ref_lon;
+  }
 }
 
 function pushPoint(sample) {
   if (mode === 'local') {
-    if (Number.isFinite(sample.ned_e) && Number.isFinite(sample.ned_n)) {
-      chart.data.datasets[0].data.push({ x: sample.ned_e, y: sample.ned_n });
-      chart.data.datasets[2].data = [{ x: sample.ned_e, y: sample.ned_n }];
+    const gpsPoint = localGpsPointFromSample(sample);
+    if (gpsPoint) {
+      state.latestGpsPoint = gpsPoint;
+      chart.data.datasets[0].data.push(gpsPoint);
+      chart.data.datasets[2].data = [gpsPoint];
     }
 
-    if (Number.isFinite(sample.corr_x_pe) && Number.isFinite(sample.corr_x_pn)) {
-      chart.data.datasets[1].data.push({ x: sample.corr_x_pe, y: sample.corr_x_pn });
-      chart.data.datasets[3].data = [{ x: sample.corr_x_pe, y: sample.corr_x_pn }];
-    } else if (Number.isFinite(sample.ins_pe) && Number.isFinite(sample.ins_pn)) {
-      chart.data.datasets[1].data.push({ x: sample.ins_pe, y: sample.ins_pn });
-      chart.data.datasets[3].data = [{ x: sample.ins_pe, y: sample.ins_pn }];
-    } else if (Number.isFinite(sample.prop_pe) && Number.isFinite(sample.prop_pn)) {
-      chart.data.datasets[1].data.push({ x: sample.prop_pe, y: sample.prop_pn });
-      chart.data.datasets[3].data = [{ x: sample.prop_pe, y: sample.prop_pn }];
+    const insPoint = latestLocalInsPoint(sample);
+    if (insPoint) {
+      state.latestInsPoint = insPoint;
+      chart.data.datasets[1].data.push(insPoint);
+      chart.data.datasets[3].data = [insPoint];
     }
   } else if (Number.isFinite(sample.lon) && Number.isFinite(sample.lat)) {
     const point = projectGpsToMeters(sample.lat, sample.lon);
@@ -261,10 +294,11 @@ function updateSummary(timeValue) {
   dom.sampleClock.textContent = `t = ${formatNumber(timeValue, 2)} s`;
 
   if (mode === 'local') {
+    const gpsPoint = state.latestGpsPoint;
+    const insPoint = state.latestInsPoint;
     dom.heroSummary.textContent =
-      `GPS Measurement (${formatNumber(state.latestSample.ned_n, 3)}, ${formatNumber(state.latestSample.ned_e, 3)})  `
-      + `EKF INS (${formatNumber(state.latestSample.corr_x_pn ?? state.latestSample.ins_pn ?? state.latestSample.prop_pn, 3)}, `
-      + `${formatNumber(state.latestSample.corr_x_pe ?? state.latestSample.ins_pe ?? state.latestSample.prop_pe, 3)})`;
+      `GPS Live (${formatNumber(gpsPoint?.y, 3)}, ${formatNumber(gpsPoint?.x, 3)})  `
+      + `INS Live (${formatNumber(insPoint?.y, 3)}, ${formatNumber(insPoint?.x, 3)})`;
   } else {
     const point = projectGpsToMeters(state.latestSample.lat, state.latestSample.lon);
     dom.heroSummary.textContent =
@@ -335,7 +369,7 @@ function handleSamples(samples) {
 
     latestTime = Math.max(latestTime, timeValue);
     mergeSample(sample);
-    pushPoint(state.latestSample);
+    pushPoint(sample);
     updateSummary(timeValue);
   }
 
@@ -350,6 +384,8 @@ function clearTrack() {
   }
   state.gpsRefLat = null;
   state.gpsRefLon = null;
+  state.latestGpsPoint = null;
+  state.latestInsPoint = null;
   chart.options.scales.x.min = undefined;
   chart.options.scales.x.max = undefined;
   chart.options.scales.y.min = undefined;

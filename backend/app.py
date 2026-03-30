@@ -26,6 +26,7 @@ store = DataStore(300)
 data_queue: queue.Queue = queue.Queue()
 status = {"message": "Connecting", "port": "N/A", "baud": 115200}
 stop_event = threading.Event()
+EMIT_PERIOD_S = 0.03
 
 
 @app.route("/")
@@ -92,7 +93,7 @@ def broadcaster() -> None:
                 payload.append(item)
             socketio.emit("data", {"samples": payload, "status": status["message"]})
 
-        time.sleep(0.1)
+        time.sleep(EMIT_PERIOD_S)
 
 
 def main() -> None:
