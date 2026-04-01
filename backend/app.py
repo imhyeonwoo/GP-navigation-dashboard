@@ -3,6 +3,7 @@ import queue
 import threading
 import time
 from pathlib import Path
+from typing import Optional
 
 from flask import Flask, jsonify, render_template
 from flask_socketio import SocketIO
@@ -29,6 +30,18 @@ stop_event = threading.Event()
 EMIT_PERIOD_S = 0.03
 
 
+def sample_time_seconds(sample: dict) -> Optional[float]:
+    tick_ms = sample.get("tick_ms")
+    if isinstance(tick_ms, (int, float)):
+        return float(tick_ms) * 1.0e-3
+
+    timestamp = sample.get("timestamp")
+    if isinstance(timestamp, (int, float)):
+        return float(timestamp)
+
+    return None
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -53,9 +66,11 @@ def local_track_view():
 def api_history():
     samples = store.snapshot()
     if samples:
-        t0 = samples[0]["timestamp"]
+        t0 = sample_time_seconds(samples[0])
         for sample in samples:
-            sample["t"] = round(sample["timestamp"] - t0, 3)
+            sample_time = sample_time_seconds(sample)
+            if t0 is not None and sample_time is not None:
+                sample["t"] = round(sample_time - t0, 3)
     return jsonify({"samples": samples, "status": dict(status)})
 
 
@@ -85,11 +100,13 @@ def broadcaster() -> None:
 
         if batch:
             samples = store.snapshot()
-            t0 = samples[0]["timestamp"] if samples else batch[0]["timestamp"]
+            t0 = sample_time_seconds(samples[0]) if samples else sample_time_seconds(batch[0])
             payload = []
             for sample in batch:
                 item = dict(sample)
-                item["t"] = round(item["timestamp"] - t0, 3)
+                sample_time = sample_time_seconds(item)
+                if t0 is not None and sample_time is not None:
+                    item["t"] = round(sample_time - t0, 3)
                 payload.append(item)
             socketio.emit("data", {"samples": payload, "status": status["message"]})
 

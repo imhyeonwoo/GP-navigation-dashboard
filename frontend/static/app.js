@@ -344,6 +344,7 @@ const state = {
   paused: false,
   pendingRedraw: false,
   latestSample: {},
+  kindStats: {},
   hiddenGroups: new Set(),
 };
 
@@ -410,6 +411,104 @@ function formatNumber(value, decimals = 3) {
     return '-';
   }
   return value.toFixed(decimals);
+}
+
+function formatInteger(value) {
+  return Number.isFinite(value) ? String(Math.round(value)) : '-';
+}
+
+function ensureKindStats(kind) {
+  if (!kind) {
+    return null;
+  }
+
+  if (!state.kindStats[kind]) {
+    state.kindStats[kind] = {
+      lastTime: null,
+      previousTime: null,
+      avgDt: null,
+      updates: 0,
+    };
+  }
+
+  return state.kindStats[kind];
+}
+
+function updateKindStats(kind, timeValue) {
+  if (!kind || !Number.isFinite(timeValue)) {
+    return;
+  }
+
+  const stats = ensureKindStats(kind);
+  if (!stats) {
+    return;
+  }
+
+  if (Number.isFinite(stats.lastTime)) {
+    const dt = timeValue - stats.lastTime;
+    if (dt > 0) {
+      stats.previousTime = stats.lastTime;
+      stats.avgDt = Number.isFinite(stats.avgDt)
+        ? (0.8 * stats.avgDt) + (0.2 * dt)
+        : dt;
+    }
+  }
+
+  stats.lastTime = timeValue;
+  stats.updates += 1;
+}
+
+function sampleAgeSeconds(kind) {
+  const stats = ensureKindStats(kind);
+  if (!stats || !Number.isFinite(stats.lastTime)) {
+    return Number.NaN;
+  }
+
+  return Math.max(0, state.latestTime - stats.lastTime);
+}
+
+function sampleRateHz(kind) {
+  const stats = ensureKindStats(kind);
+  if (!stats || !Number.isFinite(stats.avgDt) || stats.avgDt <= 0) {
+    return Number.NaN;
+  }
+
+  return 1 / stats.avgDt;
+}
+
+function formatStreamMeta(label, kind) {
+  const rateHz = sampleRateHz(kind);
+  const ageSeconds = sampleAgeSeconds(kind);
+  const parts = [];
+
+  if (Number.isFinite(rateHz)) {
+    parts.push(`${label} ${formatNumber(rateHz, 2)}Hz`);
+  }
+
+  if (Number.isFinite(ageSeconds)) {
+    parts.push(`age ${formatNumber(ageSeconds, 3)}s`);
+  }
+
+  return parts.length ? ` [${parts.join('  ')}]` : '';
+}
+
+function sampleTimeSeconds(sample) {
+  const tickMs = Number(sample?.tick_ms);
+  if (Number.isFinite(tickMs)) {
+    return tickMs * 1.0e-3;
+  }
+
+  const timestamp = Number(sample?.timestamp);
+  if (Number.isFinite(timestamp)) {
+    return timestamp;
+  }
+
+  const relativeTime = Number(sample?.t);
+  if (Number.isFinite(relativeTime)) {
+    return relativeTime;
+  }
+
+  return null;
 }
 
 function setStatus(message) {
@@ -717,23 +816,31 @@ function updateSummary(sample, timeValue) {
   }
 
   const fix = Number.isFinite(sample.fix) ? sample.fix : 0;
+  const telemetryMeta = formatStreamMeta('snap', 'telemetry');
+  const gpsMeta = formatStreamMeta('gps', 'gps_ned');
+  const gnssDiagMeta = formatStreamMeta('diag', 'gnss_diag');
+  const propMeta = formatStreamMeta('pkt', 'propagation');
+  const referenceText = sample.ref_valid === 1
+    ? `${formatNumber(sample.ref_lat, 7)}, ${formatNumber(sample.ref_lon, 7)}, h ${formatNumber(sample.ref_h, 3)}`
+    : 'ref -';
+  const gnssDiagText = Number.isFinite(sample.gnss_itow_ms)
+    ? `GPS iTOW ${formatInteger(sample.gnss_itow_ms)}  dt ${formatInteger(sample.gnss_dt_ms)}ms  sv ${formatInteger(sample.gnss_num_sv)}  fix ${formatInteger(sample.gnss_fix)}  vf ${formatInteger(sample.gnss_valid_frames)}  ue ${formatInteger(sample.gnss_uart_errors)}  ck ${formatInteger(sample.gnss_ck_failures)}  lr ${formatInteger(sample.gnss_len_rejects)}${gnssDiagMeta}`
+    : '';
   dom.infoFix.textContent = String(fix);
   dom.infoFix.className = `fix-badge fix-${Math.max(0, Math.min(fix, 5))}`;
-  dom.infoLatLon.textContent = `${formatNumber(sample.lat, 7)}, ${formatNumber(sample.lon, 7)}`;
+  dom.infoLatLon.textContent = `${formatNumber(sample.lat, 7)}, ${formatNumber(sample.lon, 7)}${telemetryMeta}`;
   dom.infoQ.textContent = `(${formatNumber(sample.qw, 4)}, ${formatNumber(sample.qx, 4)}, ${formatNumber(sample.qy, 4)}, ${formatNumber(sample.qz, 4)})`;
   dom.infoG.textContent = `(${formatNumber(sample.gx, 4)}, ${formatNumber(sample.gy, 4)}, ${formatNumber(sample.gz, 4)})`;
   dom.infoA.textContent = `(${formatNumber(sample.ax, 4)}, ${formatNumber(sample.ay, 4)}, ${formatNumber(sample.az, 4)})`;
   dom.infoPcov.textContent = `(${formatNumber(sample.pcn, 4)}, ${formatNumber(sample.pce, 4)}, ${formatNumber(sample.pcd, 4)})`;
   dom.infoVcov.textContent = `(${formatNumber(sample.vcn, 4)}, ${formatNumber(sample.vce, 4)}, ${formatNumber(sample.vcd, 4)})`;
-  dom.infoNed.textContent = `(${formatNumber(sample.ned_n, 3)}, ${formatNumber(sample.ned_e, 3)}, ${formatNumber(sample.ned_d, 3)})`;
+  dom.infoNed.textContent = `(${formatNumber(sample.ned_n, 3)}, ${formatNumber(sample.ned_e, 3)}, ${formatNumber(sample.ned_d, 3)})${gpsMeta}`;
   dom.infoAlign.textContent = `(${formatNumber(sample.bgx, 6)}, ${formatNumber(sample.bgy, 6)}, ${formatNumber(sample.bgz, 6)}) ${Number.isFinite(sample.align_samples) && Number.isFinite(sample.align_required) ? `[${sample.align_samples}/${sample.align_required}]` : ''}${sample.align_complete === 1 ? ' done' : ''}`.trim();
-  dom.infoRef.textContent = sample.ref_valid === 1
-    ? `${formatNumber(sample.ref_lat, 7)}, ${formatNumber(sample.ref_lon, 7)}, h ${formatNumber(sample.ref_h, 3)}`
-    : '-';
+  dom.infoRef.textContent = gnssDiagText ? `${referenceText}  |  ${gnssDiagText}` : referenceText;
   dom.infoPropAccel.textContent = `(${formatNumber(sample.prop_an, 4)}, ${formatNumber(sample.prop_ae, 4)}, ${formatNumber(sample.prop_ad, 4)})`;
   dom.infoPropVel.textContent = `(${formatNumber(sample.prop_vn, 4)}, ${formatNumber(sample.prop_ve, 4)}, ${formatNumber(sample.prop_vd, 4)})`;
   dom.infoPropPos.textContent = `(${formatNumber(sample.prop_pn, 4)}, ${formatNumber(sample.prop_pe, 4)}, ${formatNumber(sample.prop_pd, 4)})`;
-  dom.infoPropRate.textContent = `dt ${formatNumber(sample.prop_dt, 4)}  Hz ${formatNumber(sample.prop_rate_hz, 3)}  avg ${formatNumber(sample.prop_avg_dt, 4)}`;
+  dom.infoPropRate.textContent = `dt ${formatNumber(sample.prop_dt, 4)}  Hz ${formatNumber(sample.prop_rate_hz, 3)}  avg ${formatNumber(sample.prop_avg_dt, 4)}${propMeta}`;
   dom.infoInsFb.textContent = `(${formatNumber(sample.ins_fb_x, 4)}, ${formatNumber(sample.ins_fb_y, 4)}, ${formatNumber(sample.ins_fb_z, 4)})`;
   dom.infoInsAn.textContent = `(${formatNumber(sample.ins_an, 4)}, ${formatNumber(sample.ins_ae, 4)}, ${formatNumber(sample.ins_ad, 4)})`;
   dom.infoInsBias.textContent = `(${formatNumber(sample.ins_bax, 4)}, ${formatNumber(sample.ins_bay, 4)}, ${formatNumber(sample.ins_baz, 4)})`;
@@ -746,12 +853,12 @@ function updateSummary(sample, timeValue) {
   dom.summaryAccel.textContent = `ax ${formatNumber(sample.ax, 4)}  ay ${formatNumber(sample.ay, 4)}  az ${formatNumber(sample.az, 4)}`;
   dom.summaryPcov.textContent = `pcn ${formatNumber(sample.pcn, 4)}  pce ${formatNumber(sample.pce, 4)}  pcd ${formatNumber(sample.pcd, 4)}`;
   dom.summaryVcov.textContent = `vcn ${formatNumber(sample.vcn, 4)}  vce ${formatNumber(sample.vce, 4)}  vcd ${formatNumber(sample.vcd, 4)}`;
-  dom.summaryNed.textContent = `N ${formatNumber(sample.ned_n, 3)}  E ${formatNumber(sample.ned_e, 3)}  D ${formatNumber(sample.ned_d, 3)}`;
+  dom.summaryNed.textContent = `N ${formatNumber(sample.ned_n, 3)}  E ${formatNumber(sample.ned_e, 3)}  D ${formatNumber(sample.ned_d, 3)}${gpsMeta}`;
   dom.summaryAlign.textContent = `bgx ${formatNumber(sample.bgx, 6)}  bgy ${formatNumber(sample.bgy, 6)}  bgz ${formatNumber(sample.bgz, 6)}`;
   dom.summaryPropAccel.textContent = `aN ${formatNumber(sample.prop_an, 4)}  aE ${formatNumber(sample.prop_ae, 4)}  aD ${formatNumber(sample.prop_ad, 4)}`;
   dom.summaryPropVel.textContent = `vN ${formatNumber(sample.prop_vn, 4)}  vE ${formatNumber(sample.prop_ve, 4)}  vD ${formatNumber(sample.prop_vd, 4)}`;
   dom.summaryPropPos.textContent = `pN ${formatNumber(sample.prop_pn, 4)}  pE ${formatNumber(sample.prop_pe, 4)}  pD ${formatNumber(sample.prop_pd, 4)}`;
-  dom.summaryPropRate.textContent = `dt ${formatNumber(sample.prop_dt, 4)}  Hz ${formatNumber(sample.prop_rate_hz, 3)}  avg ${formatNumber(sample.prop_avg_dt, 4)}  min ${formatNumber(sample.prop_min_dt, 4)}  max ${formatNumber(sample.prop_max_dt, 4)}`;
+  dom.summaryPropRate.textContent = `dt ${formatNumber(sample.prop_dt, 4)}  Hz ${formatNumber(sample.prop_rate_hz, 3)}  avg ${formatNumber(sample.prop_avg_dt, 4)}  min ${formatNumber(sample.prop_min_dt, 4)}  max ${formatNumber(sample.prop_max_dt, 4)}${propMeta}`;
   dom.summaryInsFb.textContent = `fbx ${formatNumber(sample.ins_fb_x, 4)}  fby ${formatNumber(sample.ins_fb_y, 4)}  fbz ${formatNumber(sample.ins_fb_z, 4)}`;
   dom.summaryInsAn.textContent = `aN ${formatNumber(sample.ins_an, 4)}  aE ${formatNumber(sample.ins_ae, 4)}  aD ${formatNumber(sample.ins_ad, 4)}`;
   dom.summaryInsBias.textContent = `bAx ${formatNumber(sample.ins_bax, 4)}  bAy ${formatNumber(sample.ins_bay, 4)}  bAz ${formatNumber(sample.ins_baz, 4)}`;
@@ -777,20 +884,23 @@ function pushSamples(samples) {
     return;
   }
 
-  if (state.firstTimestamp == null && Number.isFinite(samples[0].timestamp)) {
-    state.firstTimestamp = samples[0].timestamp;
+  if (state.firstTimestamp == null) {
+    const firstTime = sampleTimeSeconds(samples[0]);
+    if (Number.isFinite(firstTime)) {
+      state.firstTimestamp = firstTime;
+    }
   }
 
   for (const sample of samples) {
-    const hasTimestamp = Number.isFinite(sample.timestamp) && Number.isFinite(state.firstTimestamp);
+    const sampleTime = sampleTimeSeconds(sample);
+    const hasTimestamp = Number.isFinite(sampleTime) && Number.isFinite(state.firstTimestamp);
     const timeValue = hasTimestamp
-      ? sample.timestamp - state.firstTimestamp
-      : Number.isFinite(sample.t)
-        ? sample.t
-        : state.latestTime;
+      ? sampleTime - state.firstTimestamp
+      : state.latestTime;
 
     state.latestTime = Math.max(state.latestTime, timeValue);
     state.sampleCount += 1;
+    updateKindStats(sample.kind, timeValue);
 
     mergeSample(sample);
 

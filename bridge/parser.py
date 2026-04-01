@@ -17,6 +17,7 @@ MSG_GPS_NED = 0x04
 MSG_PROPAGATION = 0x05
 MSG_INS_CHECK = 0x06
 MSG_GPS_CORRECTION = 0x07
+MSG_GNSS_DIAG = 0x08
 
 TELEMETRY_PATTERN = re.compile(
     r"GPS fix=(?P<fix>\d+)\s+"
@@ -443,6 +444,33 @@ def parse_packet(frame: bytes) -> Optional[dict]:
                 "corr_x_vn": values[21],
                 "corr_x_ve": values[22],
                 "corr_x_vd": values[23],
+            },
+            sequence,
+            tick_ms,
+        )
+
+    if msg_id == MSG_GNSS_DIAG and payload_length == 26:
+        (
+            gnss_itow_ms,
+            gnss_dt_ms,
+            gnss_valid_frames,
+            gnss_uart_errors,
+            gnss_ck_failures,
+            gnss_len_rejects,
+        ) = struct.unpack_from("<6I", payload, 0)
+        gnss_fix = payload[24]
+        gnss_num_sv = payload[25]
+        return _attach_meta(
+            {
+                "kind": "gnss_diag",
+                "gnss_itow_ms": gnss_itow_ms,
+                "gnss_dt_ms": gnss_dt_ms,
+                "gnss_valid_frames": gnss_valid_frames,
+                "gnss_uart_errors": gnss_uart_errors,
+                "gnss_ck_failures": gnss_ck_failures,
+                "gnss_len_rejects": gnss_len_rejects,
+                "gnss_fix": gnss_fix,
+                "gnss_num_sv": gnss_num_sv,
             },
             sequence,
             tick_ms,

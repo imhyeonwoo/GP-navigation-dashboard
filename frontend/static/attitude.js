@@ -120,6 +120,25 @@ function formatNumber(value, decimals = 3) {
   return value.toFixed(decimals);
 }
 
+function sampleTimeSeconds(sample) {
+  const tickMs = Number(sample?.tick_ms);
+  if (Number.isFinite(tickMs)) {
+    return tickMs * 1.0e-3;
+  }
+
+  const timestamp = Number(sample?.timestamp);
+  if (Number.isFinite(timestamp)) {
+    return timestamp;
+  }
+
+  const relativeTime = Number(sample?.t);
+  if (Number.isFinite(relativeTime)) {
+    return relativeTime;
+  }
+
+  return null;
+}
+
 function formatDegrees(value) {
   if (!Number.isFinite(value)) {
     return '-';
@@ -618,17 +637,19 @@ function handleSamples(samples) {
     return;
   }
 
-  if (state.firstTimestamp == null && Number.isFinite(samples[0].timestamp)) {
-    state.firstTimestamp = samples[0].timestamp;
+  if (state.firstTimestamp == null) {
+    const firstTime = sampleTimeSeconds(samples[0]);
+    if (Number.isFinite(firstTime)) {
+      state.firstTimestamp = firstTime;
+    }
   }
 
   for (const sample of samples) {
-    const hasTimestamp = Number.isFinite(sample.timestamp) && Number.isFinite(state.firstTimestamp);
+    const sampleTime = sampleTimeSeconds(sample);
+    const hasTimestamp = Number.isFinite(sampleTime) && Number.isFinite(state.firstTimestamp);
     const timeValue = hasTimestamp
-      ? sample.timestamp - state.firstTimestamp
-      : Number.isFinite(sample.t)
-        ? sample.t
-        : state.latestTime;
+      ? sampleTime - state.firstTimestamp
+      : state.latestTime;
 
     state.latestTime = Math.max(state.latestTime, timeValue);
     mergeSample(sample);
