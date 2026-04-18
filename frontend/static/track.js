@@ -145,7 +145,7 @@ function makeChart() {
             tension: 0.12,
           },
           {
-            label: 'INS Live Track',
+            label: 'EKF Trajectory (Ours)',
             data: [],
             showLine: true,
             borderColor: css('--c-prop-pn') || '#7dc8ff',
@@ -164,7 +164,7 @@ function makeChart() {
             pointHoverRadius: 5,
           },
           {
-            label: 'INS Live',
+            label: 'EKF Current (Ours)',
             data: [],
             showLine: false,
             borderColor: css('--c-prop-pn') || '#7dc8ff',
