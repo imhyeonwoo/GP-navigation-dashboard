@@ -135,7 +135,8 @@ function makeChart() {
       data: {
         datasets: [
           {
-            label: 'GPS Measurement',
+            // label: 'GPS Measurement',
+            label: 'PixHawk Trajectory',
             data: [],
             showLine: true,
             borderColor: css('--c-ned-e') || '#86f7b8',
@@ -155,7 +156,8 @@ function makeChart() {
             tension: 0.12,
           },
           {
-            label: 'GPS Current',
+            // label: 'GPS Current',
+            label: 'PixHawk Current',
             data: [],
             showLine: false,
             borderColor: css('--c-ned-e') || '#86f7b8',
